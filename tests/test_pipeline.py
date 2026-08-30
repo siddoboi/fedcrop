@@ -228,3 +228,51 @@ def test_proximal_term_changes_the_loss():
         opt = torch.optim.Adam(m.parameters(), lr=1e-3)
         losses.append(train_epoch(m, loader, opt, global_params=anchor, mu=mu))
     assert losses[1] > losses[0], "FedProx proximal term had no effect on the loss"
+
+
+# --------------------------------------------------------------------- xai
+
+def test_agreement_metrics_bounds():
+    import pandas as pd
+    from fedcrop.xai import agreement as agr
+    a = pd.Series([5, 4, 3, 2, 1], index=list("abcde"))
+    assert agr.kendall_tau(a, a)[0] == pytest.approx(1.0)
+    assert agr.top_k_jaccard(a, a, k=3) == pytest.approx(1.0)
+    rev = pd.Series([1, 2, 3, 4, 5], index=list("abcde"))
+    assert agr.kendall_tau(a, rev)[0] == pytest.approx(-1.0)
+    assert agr.top_k_jaccard(a, rev, k=2) == 0.0
+
+
+def test_agronomic_check_detects_confound():
+    import pandas as pd
+    from fedcrop.xai import agreement as agr
+    good = pd.Series([5, 4, 3, 2, 1],
+                     index=["sep_precipitation", "jul_precipitation",
+                            "aug_max_temp", "irrigation_ratio", "nov_precipitation"])
+    assert agr.agronomic_check(good, k=5)["verdict"] == "PASS"
+    bad = pd.Series([5, 4, 3, 2, 1],
+                    index=["nov_precipitation", "oct_precipitation",
+                           "dec_precipitation", "jul_precipitation",
+                           "irrigation_ratio"])
+    assert agr.agronomic_check(bad, k=5)["verdict"] == "FAIL"
+
+
+def test_global_baseline_rejected_without_pooled_data():
+    import numpy as np, pandas as pd
+    from fedcrop.splits import ClientData
+    from fedcrop.xai.attribution import make_baseline
+    d = ClientData("s1", np.zeros((4, 12, 5), np.float32),
+                   np.zeros((4, 9), np.float32), np.zeros(4, np.float32),
+                   pd.DataFrame({"Dist Code": range(4)}))
+    make_baseline(d, "client_mean")
+    with pytest.raises(ValueError):
+        make_baseline(d, "global_mean")
+
+
+def test_normalise_makes_clients_comparable():
+    import numpy as np, pandas as pd
+    from fedcrop.xai.aggregate import normalise
+    big = pd.Series([100.0, 50.0], index=["a", "b"])
+    small = pd.Series([2.0, 1.0], index=["a", "b"])
+    np.testing.assert_allclose(normalise(big).to_numpy(),
+                               normalise(small).to_numpy())

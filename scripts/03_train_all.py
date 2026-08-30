@@ -81,6 +81,23 @@ def federated_predictions(result, clients, bundle, cfg, which="test"):
     return out
 
 
+def mask_feature_group(clients, keep: str):
+    """Zero out a feature group after scaling, to test what carries the skill.
+
+    Zeroing rather than removing keeps the architecture and parameter count
+    identical across variants, so the comparison isolates information content
+    rather than model capacity.
+    """
+    from fedcrop.splits import ClientData
+    def zero(data):
+        seq = data.x_seq if keep in ("all", "climate") else np.zeros_like(data.x_seq)
+        cov = data.x_cov if keep in ("all", "covariates") else np.zeros_like(data.x_cov)
+        return ClientData(data.name, seq, cov, data.y, data.keys)
+    for pool in ("train", "val", "test"):
+        setattr(clients, pool, {n: zero(d) for n, d in getattr(clients, pool).items()})
+    return clients
+
+
 def mu_sweep(clients, bundle, cfg, trend, seed: int, results_dir: Path) -> int:
     """Find where FedProx stops behaving like FedAvg.
 
@@ -148,6 +165,9 @@ def main() -> int:
     ap.add_argument("--arms", nargs="*", default=ARMS, choices=ARMS)
     ap.add_argument("--mu-sweep", action="store_true",
                     help="sweep the FedProx proximal strength and exit")
+    ap.add_argument("--features", default="all",
+                    choices=["all", "climate", "covariates", "none"],
+                    help="ablate feature groups: which group the model may see")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -164,6 +184,9 @@ def main() -> int:
     bundle = features.assemble(clean, cfg)
     sp = splits.temporal_split(bundle, cfg)
     clients = prepare_clients(bundle, sp, cfg, out_dir=cfg.path("scalers"))
+    if args.features != "all":
+        clients = mask_feature_group(clients, args.features)
+        log.info("FEATURE ABLATION: model sees %s only", args.features)
 
     trend = trend_lookup(bundle, sp, cfg)
     base_table = baselines.baseline_table(bundle, sp, cfg)
@@ -226,9 +249,10 @@ def main() -> int:
     log.info("\n=== ablation, mean and sd across %d seed(s) ===\n%s",
              len(seeds), summary.to_string())
 
-    with open(results_dir / "ablation.json", "w") as fh:
+    suffix = "" if args.features == "all" else f"_{args.features}"
+    with open(results_dir / f"ablation{suffix}.json", "w") as fh:
         json.dump({"runs": df.replace({np.nan: None}).to_dict(orient="records"),
-                   "seeds": list(seeds),
+                   "seeds": list(seeds), "feature_group": args.features,
                    "reference_model": "district_trend"}, fh, indent=2)
     if fed_histories:
         with open(results_dir / "federation_history.json", "w") as fh:

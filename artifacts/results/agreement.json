@@ -1,0 +1,74 @@
+{
+  "table": [
+    {
+      "comparison": "centralised vs centralised (seed control)",
+      "kendall_tau": 0.719011,
+      "kendall_tau_sd": 0.058752,
+      "kendall_tau_lo": 0.684141,
+      "kendall_tau_hi": 0.752941,
+      "top10_jaccard": 0.630536,
+      "spearman_rho": 0.882441,
+      "n_pairs": 10
+    },
+    {
+      "comparison": "centralised vs fedavg",
+      "kendall_tau": 0.387212,
+      "kendall_tau_sd": 0.082131,
+      "kendall_tau_lo": 0.314919,
+      "kendall_tau_hi": 0.459506,
+      "top10_jaccard": 0.460073,
+      "spearman_rho": 0.539087,
+      "n_pairs": 5
+    },
+    {
+      "comparison": "centralised vs fedprox",
+      "kendall_tau": 0.380222,
+      "kendall_tau_sd": 0.077159,
+      "kendall_tau_lo": 0.312361,
+      "kendall_tau_hi": 0.448082,
+      "top10_jaccard": 0.441026,
+      "spearman_rho": 0.5292,
+      "n_pairs": 5
+    },
+    {
+      "comparison": "centralised vs fedper",
+      "kendall_tau": 0.507928,
+      "kendall_tau_sd": 0.042247,
+      "kendall_tau_lo": 0.4711,
+      "kendall_tau_hi": 0.544757,
+      "top10_jaccard": 0.545788,
+      "spearman_rho": 0.692444,
+      "n_pairs": 5
+    }
+  ],
+  "agronomic_check": {
+    "verdict": "PASS",
+    "reason": "3 of the top 10 features are monsoon months",
+    "top_features": [
+      "irrigation_ratio",
+      "nitrogen_consumption",
+      "gross_cropped_area",
+      "phosphate_consumption",
+      "gross_irrigated_area",
+      "jul_precipitation",
+      "sep_precipitation",
+      "jun_max_temp",
+      "potash_consumption",
+      "fertiliser_per_ha"
+    ],
+    "n_monsoon_in_top": 3,
+    "n_post_monsoon_in_top": 0,
+    "share_monsoon": 0.2770409882068634,
+    "share_post_monsoon": 0.15875311195850372,
+    "share_covariates": 0.3194788098335266
+  },
+  "baseline_strategy": "client_mean",
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "note": "federated attributions use per-client baselines because no client may access another's data; centralised uses the same strategy for a fair comparison"
+}
