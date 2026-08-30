@@ -1,0 +1,43 @@
+# Base configuration. Every script loads this.
+# Overrides go in config/experiments/*.yaml and are merged on top.
+
+paths:
+  raw_xls: data/raw/main_merge__droped__merge__2___560_dist_1990-2015_.xls
+  interim: data/interim/panel.parquet
+  processed: data/processed
+  results: artifacts/results
+  scalers: artifacts/scalers
+  models: artifacts/models
+
+data:
+  target: "RICE YIELD (Kg per ha)"
+  partition_key: "State Name"
+  district_key: "Dist Code"
+  year_key: "Year"
+
+cleaning:
+  min_rice_area: 2.0        # thousand ha. Measured from yield-noise breakpoint.
+  drop_zero_yield: true
+  drop_missing_climate: true
+  outlier_z: 3.0            # computed on training years only
+
+split:
+  train_years: [1990, 2009]
+  val_years: [2010, 2011]
+  test_years: [2012, 2015]
+
+features:
+  window: jan_dec           # jan_dec | jun_nov | agri_year
+  sequential_vars:
+    - max_temp
+    - min_temp
+    - precipitation
+    - evapotranspiration
+    - windspeed
+
+baselines:
+  min_train_years_for_trend: 5
+
+run:
+  seed: 42
+  seeds: [42, 43, 44, 45, 46]

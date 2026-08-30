@@ -1,0 +1,324 @@
+{
+  "rows": 10223,
+  "districts": 501,
+  "states": 20,
+  "year_min": 1990,
+  "year_max": 2015,
+  "split_sizes": {
+    "train": 7579,
+    "val": 878,
+    "test": 1766
+  },
+  "n_features": 69,
+  "feature_names": [
+    "jan_max_temp",
+    "jan_min_temp",
+    "jan_precipitation",
+    "jan_evapotranspiration",
+    "jan_windspeed",
+    "feb_max_temp",
+    "feb_min_temp",
+    "feb_precipitation",
+    "feb_evapotranspiration",
+    "feb_windspeed",
+    "mar_max_temp",
+    "mar_min_temp",
+    "mar_precipitation",
+    "mar_evapotranspiration",
+    "mar_windspeed",
+    "apr_max_temp",
+    "apr_min_temp",
+    "apr_precipitation",
+    "apr_evapotranspiration",
+    "apr_windspeed",
+    "may_max_temp",
+    "may_min_temp",
+    "may_precipitation",
+    "may_evapotranspiration",
+    "may_windspeed",
+    "jun_max_temp",
+    "jun_min_temp",
+    "jun_precipitation",
+    "jun_evapotranspiration",
+    "jun_windspeed",
+    "jul_max_temp",
+    "jul_min_temp",
+    "jul_precipitation",
+    "jul_evapotranspiration",
+    "jul_windspeed",
+    "aug_max_temp",
+    "aug_min_temp",
+    "aug_precipitation",
+    "aug_evapotranspiration",
+    "aug_windspeed",
+    "sep_max_temp",
+    "sep_min_temp",
+    "sep_precipitation",
+    "sep_evapotranspiration",
+    "sep_windspeed",
+    "oct_max_temp",
+    "oct_min_temp",
+    "oct_precipitation",
+    "oct_evapotranspiration",
+    "oct_windspeed",
+    "nov_max_temp",
+    "nov_min_temp",
+    "nov_precipitation",
+    "nov_evapotranspiration",
+    "nov_windspeed",
+    "dec_max_temp",
+    "dec_min_temp",
+    "dec_precipitation",
+    "dec_evapotranspiration",
+    "dec_windspeed",
+    "rice_area",
+    "nitrogen_consumption",
+    "phosphate_consumption",
+    "potash_consumption",
+    "gross_cropped_area",
+    "gross_irrigated_area",
+    "irrigation_ratio",
+    "fertiliser_per_ha",
+    "rice_area_share"
+  ],
+  "clients": {
+    "Andhra Pradesh": {
+      "rows": 338,
+      "mean_yield": 2747.3,
+      "deficit_years": [
+        1993,
+        1999,
+        2002
+      ]
+    },
+    "Assam": {
+      "rows": 638,
+      "mean_yield": 1603.8,
+      "deficit_years": [
+        1994,
+        2005,
+        2006
+      ]
+    },
+    "Bihar": {
+      "rows": 943,
+      "mean_yield": 1506.1,
+      "deficit_years": [
+        1992,
+        1993,
+        2014
+      ]
+    },
+    "Chhattisgarh": {
+      "rows": 293,
+      "mean_yield": 1389.7,
+      "deficit_years": [
+        2000,
+        2002,
+        2009
+      ]
+    },
+    "Gujarat": {
+      "rows": 361,
+      "mean_yield": 1657.2,
+      "deficit_years": [
+        1991,
+        1999,
+        2002
+      ]
+    },
+    "Haryana": {
+      "rows": 438,
+      "mean_yield": 2752.1,
+      "deficit_years": [
+        1999,
+        2002,
+        2004
+      ]
+    },
+    "Himachal Pradesh": {
+      "rows": 191,
+      "mean_yield": 1471.9,
+      "deficit_years": [
+        2004,
+        2007,
+        2009
+      ]
+    },
+    "Jharkhand": {
+      "rows": 357,
+      "mean_yield": 1560.6,
+      "deficit_years": [
+        2000,
+        2003,
+        2010
+      ]
+    },
+    "Karnataka": {
+      "rows": 593,
+      "mean_yield": 2402.8,
+      "deficit_years": [
+        1990,
+        2002,
+        2012
+      ]
+    },
+    "Kerala": {
+      "rows": 353,
+      "mean_yield": 2177.2,
+      "deficit_years": [
+        1990,
+        1999,
+        2002
+      ]
+    },
+    "Madhya Pradesh": {
+      "rows": 807,
+      "mean_yield": 1019.4,
+      "deficit_years": [
+        2001,
+        2002,
+        2009
+      ]
+    },
+    "Maharashtra": {
+      "rows": 601,
+      "mean_yield": 1263.7,
+      "deficit_years": [
+        1991,
+        2001,
+        2002
+      ]
+    },
+    "Orissa": {
+      "rows": 695,
+      "mean_yield": 1467.0,
+      "deficit_years": [
+        1995,
+        1996,
+        2000
+      ]
+    },
+    "Punjab": {
+      "rows": 451,
+      "mean_yield": 3613.2,
+      "deficit_years": [
+        2004,
+        2007,
+        2009
+      ]
+    },
+    "Rajasthan": {
+      "rows": 225,
+      "mean_yield": 1579.9,
+      "deficit_years": [
+        2002,
+        2004,
+        2009
+      ]
+    },
+    "Tamil Nadu": {
+      "rows": 612,
+      "mean_yield": 3276.1,
+      "deficit_years": [
+        1994,
+        1999,
+        2002
+      ]
+    },
+    "Telangana": {
+      "rows": 18,
+      "mean_yield": 2942.2,
+      "deficit_years": [
+        1990,
+        2014,
+        2015
+      ]
+    },
+    "Uttar Pradesh": {
+      "rows": 1645,
+      "mean_yield": 2050.1,
+      "deficit_years": [
+        2009,
+        2010,
+        2014
+      ]
+    },
+    "Uttarakhand": {
+      "rows": 208,
+      "mean_yield": 1636.6,
+      "deficit_years": [
+        2004,
+        2007,
+        2014
+      ]
+    },
+    "West Bengal": {
+      "rows": 456,
+      "mean_yield": 2349.4,
+      "deficit_years": [
+        1994,
+        2005,
+        2012
+      ]
+    }
+  },
+  "cleaning_audit": [
+    {
+      "step": "raw",
+      "rows_before": 12803,
+      "rows_after": 12803,
+      "removed": 0,
+      "worst_state": "",
+      "worst_state_removed": 0
+    },
+    {
+      "step": "target not null",
+      "rows_before": 12803,
+      "rows_after": 12751,
+      "removed": 52,
+      "worst_state": "Jharkhand",
+      "worst_state_removed": 39
+    },
+    {
+      "step": "yield > 0",
+      "rows_before": 12751,
+      "rows_after": 11969,
+      "removed": 782,
+      "worst_state": "Rajasthan",
+      "worst_state_removed": 279
+    },
+    {
+      "step": "rice area > 0",
+      "rows_before": 11969,
+      "rows_after": 11944,
+      "removed": 25,
+      "worst_state": "Rajasthan",
+      "worst_state_removed": 22
+    },
+    {
+      "step": "rice area >= 2.0k ha",
+      "rows_before": 11944,
+      "rows_after": 10867,
+      "removed": 1077,
+      "worst_state": "Rajasthan",
+      "worst_state_removed": 301
+    },
+    {
+      "step": "climate complete",
+      "rows_before": 10867,
+      "rows_after": 10318,
+      "removed": 549,
+      "worst_state": "Telangana",
+      "worst_state_removed": 216
+    },
+    {
+      "step": "|z| <= 3.0",
+      "rows_before": 10318,
+      "rows_after": 10223,
+      "removed": 95,
+      "worst_state": "Tamil Nadu",
+      "worst_state_removed": 79
+    }
+  ]
+}

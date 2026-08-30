@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Never commit the dataset. Download it from Mendeley instead.
+data/raw/*
+!data/raw/.gitkeep
+data/interim/
+data/processed/
+
+artifacts/models/
+artifacts/scalers/
