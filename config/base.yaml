@@ -41,3 +41,27 @@ baselines:
 run:
   seed: 42
   seeds: [42, 43, 44, 45, 46]
+
+model:
+  hidden: 64
+  dense: 32
+  dropout: 0.2
+  num_layers: 1
+
+training:
+  epochs: 200
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  patience: 20
+
+federated:
+  rounds: 120           # raised from 60: FedPer hit the cap on some seeds
+  local_epochs: 2
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  mu: 0.01              # FedProx proximal strength. Set from the sweep below.
+  patience: 20          # raised with rounds, so a slow seed is not cut short
+  min_delta: 0.0001
+  mu_grid: [0.001, 0.01, 0.1, 1.0]   # used by --mu-sweep

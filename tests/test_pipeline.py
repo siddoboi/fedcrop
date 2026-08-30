@@ -170,3 +170,61 @@ def test_scaler_fitted_on_train_only_does_not_see_test():
     assert abs(float(scaled.y.mean())) > 0.5, (
         "test data was recentred to zero, so the scaler saw the test split"
     )
+
+
+# ------------------------------------------------------- model and federation
+
+def test_model_shapes_and_fedper_split():
+    import torch
+    from fedcrop.model import YieldGRU, count_parameters
+    m = YieldGRU(n_seq_vars=5, n_covariates=9, hidden=64)
+    out = m(torch.randn(7, 12, 5), torch.randn(7, 9))
+    assert out.shape == (7,)
+    base, head = m.base_parameter_keys(), m.head_parameter_keys()
+    assert set(base) | set(head) == set(m.state_dict())
+    assert not (set(base) & set(head))
+    assert count_parameters(m) == 16033
+
+
+def test_aggregate_is_sample_weighted():
+    import torch
+    from fedcrop.fl.aggregate import aggregate
+    a = {"w": torch.tensor([0.0])}
+    b = {"w": torch.tensor([10.0])}
+    merged = aggregate([a, b], [90.0, 10.0])
+    assert abs(float(merged["w"]) - 1.0) < 1e-6
+
+
+def test_fedper_leaves_heads_untouched():
+    import torch
+    from fedcrop.fl.aggregate import aggregate
+    from fedcrop.fl.param_utils import set_parameters
+    from fedcrop.model import YieldGRU
+    m = YieldGRU()
+    base = m.base_parameter_keys()
+    before = {k: v.clone() for k, v in m.state_dict().items()}
+    other = YieldGRU()
+    merged = aggregate([m.state_dict(), other.state_dict()], [1.0, 1.0], keys=base)
+    set_parameters(m, merged, keys=base)
+    after = m.state_dict()
+    for k in m.head_parameter_keys():
+        assert torch.equal(before[k], after[k]), f"head key {k} was modified"
+    assert not torch.equal(before[base[0]], after[base[0]])
+
+
+def test_proximal_term_changes_the_loss():
+    import torch
+    from torch.utils.data import DataLoader, TensorDataset
+    from fedcrop.model import YieldGRU
+    from fedcrop.train import train_epoch
+    torch.manual_seed(0)
+    ds = TensorDataset(torch.randn(16, 12, 5), torch.randn(16, 9), torch.randn(16))
+    loader = DataLoader(ds, batch_size=8)
+    losses = []
+    for mu in (0.0, 10.0):
+        torch.manual_seed(0)
+        m = YieldGRU()
+        anchor = {k: torch.zeros_like(v) for k, v in m.named_parameters()}
+        opt = torch.optim.Adam(m.parameters(), lr=1e-3)
+        losses.append(train_epoch(m, loader, opt, global_params=anchor, mu=mu))
+    assert losses[1] > losses[0], "FedProx proximal term had no effect on the loss"

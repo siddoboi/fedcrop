@@ -1,0 +1,122 @@
+{
+  "model": {
+    "total_parameters": 16033,
+    "base_parameters": 13632,
+    "head_parameters": 2401,
+    "fedper_shared_pct": 85.0,
+    "state_dict_bytes": 64132,
+    "state_dict_kb": 62.6,
+    "gru_flops_per_sample": 294912,
+    "forward_cost": "O(T*H^2) = O(12*64^2)"
+  },
+  "parameters": [
+    {
+      "parameter": "gru.weight_ih_l0",
+      "shape": [
+        192,
+        5
+      ],
+      "count": 960,
+      "share_pct": 6.0
+    },
+    {
+      "parameter": "gru.weight_hh_l0",
+      "shape": [
+        192,
+        64
+      ],
+      "count": 12288,
+      "share_pct": 76.6
+    },
+    {
+      "parameter": "gru.bias_ih_l0",
+      "shape": [
+        192
+      ],
+      "count": 192,
+      "share_pct": 1.2
+    },
+    {
+      "parameter": "gru.bias_hh_l0",
+      "shape": [
+        192
+      ],
+      "count": 192,
+      "share_pct": 1.2
+    },
+    {
+      "parameter": "head.0.weight",
+      "shape": [
+        32,
+        73
+      ],
+      "count": 2336,
+      "share_pct": 14.6
+    },
+    {
+      "parameter": "head.0.bias",
+      "shape": [
+        32
+      ],
+      "count": 32,
+      "share_pct": 0.2
+    },
+    {
+      "parameter": "head.3.weight",
+      "shape": [
+        1,
+        32
+      ],
+      "count": 32,
+      "share_pct": 0.2
+    },
+    {
+      "parameter": "head.3.bias",
+      "shape": [
+        1
+      ],
+      "count": 1,
+      "share_pct": 0.0
+    }
+  ],
+  "inference": {
+    "batch_size": 200,
+    "batch_seconds": 0.004,
+    "ms_per_sample": 0.02
+  },
+  "asymptotics": {
+    "training_per_round": "O(K * E * N_k * T * H^2)",
+    "communication_per_round": "O(K * P)",
+    "total_training": "O(R * K * E * N_k * T * H^2)",
+    "note": "communication is independent of dataset size, which is the argument for a compact recurrent model over a transformer"
+  },
+  "communication": [
+    {
+      "algorithm": "fedavg",
+      "rounds_run": 29,
+      "bytes_per_round_all_clients": 1218508,
+      "kb_per_round": 1189.9,
+      "total_mb": 33.7,
+      "wall_clock_s": 51.9,
+      "s_per_round": 1.79
+    },
+    {
+      "algorithm": "fedprox",
+      "rounds_run": 26,
+      "bytes_per_round_all_clients": 1218508,
+      "kb_per_round": 1189.9,
+      "total_mb": 30.21,
+      "wall_clock_s": 50.6,
+      "s_per_round": 1.95
+    },
+    {
+      "algorithm": "fedper",
+      "rounds_run": 57,
+      "bytes_per_round_all_clients": 1036032,
+      "kb_per_round": 1011.8,
+      "total_mb": 56.32,
+      "wall_clock_s": 103.3,
+      "s_per_round": 1.81
+    }
+  ]
+}
