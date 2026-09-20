@@ -255,12 +255,14 @@ def main() -> int:
                    "seeds": list(seeds), "feature_group": args.features,
                    "reference_model": "district_trend"}, fh, indent=2)
     if fed_histories:
-        with open(results_dir / "federation_history.json", "w") as fh:
+        with open(results_dir / f"federation_history{suffix}.json", "w") as fh:
             json.dump(fed_histories, fh, indent=2)
 
     report = complexity.complexity_report(build_model(bundle, cfg),
                                           fed_results_for_complexity or None)
-    with open(results_dir / "complexity.json", "w") as fh:
+    # suffixed like ablation: a climate-only run must not overwrite the
+    # complexity figures of the full model, which R2 reports.
+    with open(results_dir / f"complexity{suffix}.json", "w") as fh:
         json.dump(report, fh, indent=2)
     log.info("\n=== complexity ===")
     for k, v in report["model"].items():
@@ -268,7 +270,8 @@ def main() -> int:
     if "communication" in report:
         log.info("\n%s", pd.DataFrame(report["communication"]).to_string(index=False))
 
-    log.info("\nwrote ablation.json, federation_history.json, complexity.json")
+    log.info("\nwrote ablation%s.json, federation_history%s.json, complexity%s.json",
+             suffix, suffix, suffix)
     return 0
 
 
