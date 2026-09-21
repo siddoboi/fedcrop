@@ -1,6 +1,6 @@
 # End-to-end verification
 
-Run 2026-09-21 00:19 UTC · Python 3.11.15 · Linux x86_64
+Run 2026-09-21 00:36 UTC · Python 3.12.10 · Windows AMD64
 
 Produced by `scripts/08_verify_e2e.py`. Every line below is the recorded result of an executed check.
 
@@ -8,11 +8,11 @@ Produced by `scripts/08_verify_e2e.py`. Every line below is the recorded result 
 
 ```
 $ python -m pytest tests -q
-54 passed in 4.28s
+54 passed in 7.40s
 ```
 
-- pipeline: 22 passed in 3.82s
-- API: 32 passed in 0.46s
+- pipeline: 22 passed in 6.14s
+- API: 32 passed in 0.83s
 
 ## 2. Pipeline gate A
 
@@ -27,23 +27,23 @@ Gate A re-derives the row counts, the pooled and within-district correlations, t
 
 | Route | Expected | Got | ms | Bytes |
 |---|---:|---:|---:|---:|
-| `/api/health` | 200 | 200 | 5 | 988 |
-| `/api/headline` | 200 | 200 | 4 | 309 |
-| `/api/ablation` | 200 | 200 | 3 | 3,045 |
-| `/api/agreement` | 200 | 200 | 1 | 1,527 |
-| `/api/complexity` | 200 | 200 | 1 | 1,656 |
-| `/api/mu-sweep` | 200 | 200 | 1 | 846 |
+| `/api/health` | 200 | 200 | 33 | 1,009 |
+| `/api/headline` | 200 | 200 | 27 | 309 |
+| `/api/ablation` | 200 | 200 | 16 | 3,045 |
+| `/api/agreement` | 200 | 200 | 2 | 1,527 |
+| `/api/complexity` | 200 | 200 | 2 | 1,656 |
+| `/api/mu-sweep` | 200 | 200 | 2 | 846 |
 | `/api/fidelity` | 200 | 200 | 2 | 704 |
-| `/api/confound` | 200 | 200 | 1 | 1,030 |
-| `/api/clients` | 200 | 200 | 1 | 1,767 |
-| `/api/bundle` | 200 | 200 | 5 | 9,487 |
-| `/api/state/Uttar%20Pradesh` | 200 | 200 | 1 | 1,316 |
-| `/api/state/Nowhere` | 404 | 404 | 1 | 36 |
-| `/api/results/meta` | 200 | 200 | 1 | 3,921 |
-| `/api/results/ood` | 409 | 409 | 1 | 95 |
-| `/api/results/nonsense` | 404 | 404 | 1 | 40 |
-| `/` | 200 | 200 | 2 | 12,237 |
-| `/results` | 200 | 200 | 2 | 23,364 |
+| `/api/confound` | 200 | 200 | 21 | 1,030 |
+| `/api/clients` | 200 | 200 | 15 | 1,767 |
+| `/api/bundle` | 200 | 200 | 22 | 9,508 |
+| `/api/state/Uttar%20Pradesh` | 200 | 200 | 24 | 1,316 |
+| `/api/state/Nowhere` | 404 | 404 | 16 | 36 |
+| `/api/results/meta` | 200 | 200 | 16 | 3,921 |
+| `/api/results/ood` | 409 | 409 | 16 | 95 |
+| `/api/results/nonsense` | 404 | 404 | 15 | 40 |
+| `/` | 200 | 200 | 17 | 12,237 |
+| `/results` | 200 | 200 | 3 | 23,364 |
 
 ## 4. Artifact inventory as reported by the service
 
@@ -51,17 +51,17 @@ Service status: **ok**
 
 | Artifact | Required | Present | KB |
 |---|---|---|---:|
-| meta | yes | yes | 6.0 |
-| baselines | yes | yes | 3.9 |
-| ablation | yes | yes | 9.3 |
+| meta | yes | yes | 6.3 |
+| baselines | yes | yes | 4.0 |
+| ablation | yes | yes | 9.6 |
 | agreement | yes | yes | 2.0 |
-| complexity | yes | yes | 2.4 |
+| complexity | yes | yes | 2.5 |
 | mu_sweep | yes | yes | 1.1 |
-| fidelity | yes | yes | 4.3 |
+| fidelity | yes | yes | 4.5 |
 | confound | yes | yes | 6.6 |
-| heterogeneity | no | yes | 16.1 |
-| attributions | no | yes | 271.2 |
-| federation_history | no | yes | 130.8 |
+| heterogeneity | no | yes | 16.7 |
+| attributions | no | yes | 276.8 |
+| federation_history | no | yes | 134.8 |
 | ood | no | **no** | 0.0 |
 | perturbation | no | **no** | 0.0 |
 | significance | no | **no** | 0.0 |
