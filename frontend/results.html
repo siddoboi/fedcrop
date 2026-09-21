@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fedcrop Results</title>
+<style>
+  /* Palette taken from Literature_Review_Deck.pptx */
+  :root{
+    --bg:        #1C2B1C;   /* deep forest, deck body background */
+    --surface:   #223522;   /* card fill */
+    --surface-2: #2C5F2D;   /* forest, deck title background */
+    --line:      #3C5A3C;
+    --text:      #D8DED8;   /* light sage, deck body text */
+    --text-hi:   #FFFFFF;
+    --muted:     #8CA08C;
+    --moss:      #97BC62;   /* positive */
+    --clay:      #B85042;   /* negative / warning */
+    --sand:      #F5F5F5;
+    --serif: Cambria, Georgia, "Times New Roman", serif;
+    --sans: Calibri, "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 28px 72px}
+
+  /* ---------- header ---------- */
+  header{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:34px}
+  .eyebrow{
+    font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--moss);margin:0 0 10px
+  }
+  h1{font-family:var(--serif);font-size:34px;font-weight:700;color:var(--text-hi);margin:0 0 8px;line-height:1.2}
+  .sub{color:var(--muted);font-size:14.5px;margin:0}
+
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:26px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 15px}
+  .stat .v{font-family:var(--serif);font-size:25px;font-weight:700;color:var(--text-hi);line-height:1.1}
+  .stat .k{font-size:11px;color:var(--muted);margin-top:5px;letter-spacing:.03em}
+
+  /* ---------- sections ---------- */
+  section{margin-bottom:38px}
+  h2{
+    font-family:var(--serif);font-size:20px;font-weight:700;color:var(--text-hi);
+    margin:0 0 4px;display:flex;align-items:baseline;gap:11px
+  }
+  h2 .tag{
+    font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.11em;
+    text-transform:uppercase;color:var(--moss);border:1px solid var(--line);
+    border-radius:4px;padding:2px 7px
+  }
+  .lede{color:var(--muted);font-size:13.5px;margin:0 0 16px;max-width:860px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+
+  /* ---------- tables ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{
+    text-align:right;font-size:10.5px;font-weight:700;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--muted);padding:0 10px 9px;
+    border-bottom:1px solid var(--line);white-space:nowrap
+  }
+  th:first-child,td:first-child{text-align:left;padding-left:0}
+  th:last-child,td:last-child{padding-right:0}
+  td{padding:9px 10px;border-bottom:1px solid rgba(60,90,60,.42);text-align:right;
+     font-variant-numeric:tabular-nums}
+  tr:last-child td{border-bottom:none}
+  .name{color:var(--text-hi);font-weight:600}
+  .baseline .name{color:var(--muted);font-weight:500}
+  .ref .name::after{
+    content:"reference";font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--moss);border:1px solid var(--line);border-radius:3px;
+    padding:1px 5px;margin-left:8px;font-weight:700
+  }
+  .sd{color:var(--muted);font-size:11.5px}
+  .pos{color:var(--moss);font-weight:600}
+  .neg{color:var(--clay);font-weight:600}
+
+  /* diverging skill bar */
+  .bar{position:relative;height:16px;width:150px;display:inline-block;vertical-align:middle}
+  .bar i{position:absolute;top:2px;height:12px;border-radius:2px;display:block}
+  .bar .zero{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line)}
+
+  /* ---------- callout ---------- */
+  .callout{
+    border-left:3px solid var(--moss);background:rgba(151,188,98,.07);
+    padding:13px 17px;border-radius:0 7px 7px 0;margin-top:18px;
+    font-size:13.5px;color:var(--text)
+  }
+  .callout strong{color:var(--text-hi)}
+  .callout.warn{border-left-color:var(--clay);background:rgba(184,80,66,.09)}
+
+  /* ---------- two column ---------- */
+  /* align-items:start stops a short card being stretched to match a tall
+     neighbour, which otherwise leaves a block of dead green below it */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+  th.plain{text-transform:none;letter-spacing:.04em;font-size:12px}
+
+  /* ---------- key/value list ---------- */
+  .kv{display:flex;justify-content:space-between;gap:14px;padding:8px 0;
+      border-bottom:1px solid rgba(60,90,60,.42);font-size:13.5px}
+  .kv:last-child{border-bottom:none}
+  .kv span:first-child{color:var(--muted)}
+  .kv span:last-child{color:var(--text-hi);font-weight:600;font-variant-numeric:tabular-nums;
+                      text-align:right}
+
+  /* ---------- status pills ---------- */
+  .pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+        text-transform:uppercase;padding:3px 8px;border-radius:4px}
+  .pill.ok{color:var(--moss);border:1px solid rgba(151,188,98,.45);background:rgba(151,188,98,.09)}
+  .pill.no{color:var(--clay);border:1px solid rgba(184,80,66,.45);background:rgba(184,80,66,.09)}
+
+  .grid-status{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .st{display:flex;justify-content:space-between;align-items:center;gap:8px;
+      padding:9px 12px;border:1px solid var(--line);border-radius:7px;font-size:12.5px}
+  .st b{font-weight:600;color:var(--text)}
+
+  footer{border-top:1px solid var(--line);padding-top:18px;margin-top:40px;
+         color:var(--muted);font-size:11.5px;display:flex;justify-content:space-between;gap:20px}
+
+  .loading{color:var(--muted);padding:60px 0;text-align:center;font-size:14px}
+  svg text{font-family:var(--sans)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="loading">Loading results from the API…</div>
+</div>
+
+<script>
+const F = {
+  n:  (v, d=3) => v == null ? "—" : v.toFixed(d),
+  sg: (v, d=3) => v == null ? "—" : (v >= 0 ? "+" : "") + v.toFixed(d),
+  // en-US grouping: technical counts read better as 294,912 than as the
+  // Indian lakh grouping 2,94,912
+  i:  (v) => v == null ? "—" : v.toLocaleString("en-US"),
+};
+
+/* diverging bar, centred on zero, scaled to the largest magnitude present */
+function skillBar(value, max) {
+  if (value == null) return "";
+  const half = 75, w = Math.max(2, Math.abs(value) / max * half);
+  const pos = value >= 0;
+  const left = pos ? half : half - w;
+  const col = pos ? "var(--moss)" : "var(--clay)";
+  return `<span class="bar"><span class="zero"></span>
+    <i style="left:${left}px;width:${w}px;background:${col}"></i></span>`;
+}
+
+function ablationSection(ab) {
+  const learned = ab.rows.filter(r => r.skill_vs_trend != null);
+  const max = Math.max(...learned.map(r => Math.abs(r.skill_vs_trend)), 0.01);
+
+  const body = ab.rows.map(r => {
+    const cls = [r.is_baseline ? "baseline" : "", r.is_reference ? "ref" : ""]
+      .filter(Boolean).join(" ");
+    const skillCell = r.skill_vs_trend == null
+      ? `<td class="sd">${r.is_reference ? "baseline" : "—"}</td>`
+      : `<td><span class="${r.skill_vs_trend >= 0 ? "pos" : "neg"}">${F.sg(r.skill_vs_trend)}</span>
+           <span class="sd"> ± ${F.n(r.skill_sd)}</span></td>`;
+    return `<tr class="${cls}">
+      <td class="name">${r.label}</td>
+      <td>${F.n(r.r2)}${r.r2_sd ? `<span class="sd"> ± ${F.n(r.r2_sd)}</span>` : ""}</td>
+      ${skillCell}
+      <td>${skillBar(r.skill_vs_trend, max)}</td>
+      <td>${F.n(r.worst_client_rmse, 0)}</td>
+      <td>${F.n(r.cross_client_rmse_std, 0)}</td>
+      <td class="sd">${r.is_baseline ? "1" : r.n_seeds}</td>
+    </tr>`;
+  }).join("");
+
+  return `<section>
+    <h2>Predictive validation <span class="tag">R3 · axis 1</span></h2>
+    <p class="lede">Every learned arm is measured as skill against the district-trend
+      baseline, not against zero. Baselines are deterministic; learned arms are the mean
+      of ${ab.seeds.length} seeds (${ab.seeds.join(", ")}).</p>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Arm</th><th>R²</th><th>Skill vs trend</th><th></th>
+          <th>Worst client RMSE</th><th>Cross-client SD</th><th>Seeds</th>
+        </tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+      <div class="callout">
+        <strong>Reading this table.</strong> Federated methods trade accuracy for
+        cross-client uniformity. Local-only and centralised outperform federation here
+        because state-level heterogeneity dominates: FedAvg and FedProx hold the lowest
+        cross-client spread (≈189) while giving up skill, and FedPer recovers the accuracy
+        by declining to average the head. This is the expected ordering under strong
+        non-IID data, not a failed federation.
+      </div>
+    </div>
+  </section>`;
+}
+
+function agreementSection(ag) {
+  const rows = ag.table;
+  const ctrl = rows.find(r => r.comparison.includes("seed control"));
+  // Fixed geometry: bars live in 0..W, every numeric label sits in its own
+  // column starting at LBL, so nothing can collide with the control line.
+  const max = 0.85, W = 250, LBL = W + 16, ROW = 52, VB = LBL + 180;
+  const x = v => v / max * W;
+
+  const bars = rows.map((r, i) => {
+    const isCtrl = r === ctrl;
+    const col = isCtrl ? "var(--sand)" : "var(--moss)";
+    return `<g transform="translate(0,${i * ROW})">
+      <text x="0" y="12" font-size="12.5" fill="${isCtrl ? "#FFFFFF" : "#D8DED8"}"
+            font-weight="${isCtrl ? 700 : 400}">${
+              r.comparison.replace("centralised vs ", "").replace(" (seed control)", "")
+            }${isCtrl ? '<tspan fill="#8CA08C" font-weight="400" dx="8">seed-stability control</tspan>' : ""}</text>
+      <rect x="0" y="20" width="${x(r.kendall_tau)}" height="12" rx="2" fill="${col}"
+            opacity="${isCtrl ? 1 : .9}"/>
+      <!-- CI drawn below the bar so it reads as an interval, not a gap in the bar -->
+      <line x1="${x(r.kendall_tau_lo)}" x2="${x(r.kendall_tau_hi)}" y1="38.5" y2="38.5"
+            stroke="#8CA08C" stroke-width="1.4"/>
+      <line x1="${x(r.kendall_tau_lo)}" x2="${x(r.kendall_tau_lo)}" y1="35" y2="42"
+            stroke="#8CA08C" stroke-width="1.4"/>
+      <line x1="${x(r.kendall_tau_hi)}" x2="${x(r.kendall_tau_hi)}" y1="35" y2="42"
+            stroke="#8CA08C" stroke-width="1.4"/>
+      <text x="${LBL}" y="31" font-size="13" fill="#FFFFFF" font-weight="600">τ ${
+        r.kendall_tau.toFixed(3)}</text>
+      <text x="${LBL}" y="44" font-size="10.5" fill="#8CA08C">95% CI [${
+        r.kendall_tau_lo.toFixed(3)}, ${r.kendall_tau_hi.toFixed(3)}]</text>
+    </g>`;
+  }).join("");
+
+  // Control floor: drawn only across the bar band, and stopping short of the
+  // label column.
+  const cx0 = x(ctrl.kendall_tau_lo);
+  const ctrlLine = `<line x1="${cx0}" x2="${cx0}" y1="14" y2="${rows.length * ROW - 6}"
+     stroke="#F5F5F5" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
+    <text x="${cx0 + 5}" y="${rows.length * ROW - 12}" font-size="10" fill="#8CA08C">
+      control floor</text>`;
+
+  const a = ag.agronomic_check;
+  const chips = a.top_features.slice(0, 10).map((f, i) => {
+    const monsoon = /^(jun|jul|aug|sep)_/.test(f);
+    const col = monsoon ? "var(--moss)" : "var(--muted)";
+    return `<div class="kv"><span>${i + 1}. ${f.replace(/_/g, " ")}</span>
+      <span style="color:${col};font-size:11px;letter-spacing:.06em;text-transform:uppercase">${
+        monsoon ? "monsoon" : ""}</span></div>`;
+  }).join("");
+
+  return `<section>
+    <h2>Explanation validation <span class="tag">R3 · axis 2 · contribution</span></h2>
+    <p class="lede">Rank agreement between each arm's GradientSHAP attributions and the
+      centralised model's, measured against a seed-stability control. The control is two
+      centralised models differing only by seed, so it bounds how much agreement is
+      achievable at all. No federated interval reaches it.</p>
+    <div class="cols" style="grid-template-columns:1.45fr 1fr">
+      <div class="card">
+        <svg viewBox="0 0 ${VB} ${rows.length * ROW}" width="100%"
+             height="${rows.length * ROW}">${ctrlLine}${bars}</svg>
+        <div class="callout">
+          <strong>The gap is federation, not noise.</strong> Seed variation alone leaves
+          τ at ${ctrl.kendall_tau.toFixed(3)}. Federation drops it to
+          ${Math.min(...rows.filter(r => r !== ctrl).map(r => r.kendall_tau)).toFixed(3)}–${
+            Math.max(...rows.filter(r => r !== ctrl).map(r => r.kendall_tau)).toFixed(3)},
+          with no confidence interval overlapping the control.
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-family:var(--serif);font-size:15px;color:var(--text-hi);font-weight:700">
+            Agronomic plausibility</span>
+          <span class="pill ok">${a.verdict}</span>
+        </div>
+        <p class="lede" style="margin-bottom:10px;font-size:12.5px">${a.reason}, and no
+          post-monsoon month appears. Top 10 features of the federated global model.</p>
+        ${chips}
+        <div class="kv" style="margin-top:8px;border-top:1px solid var(--line);padding-top:10px">
+          <span>Attribution share, monsoon</span><span>${(a.share_monsoon * 100).toFixed(1)}%</span></div>
+        <div class="kv"><span>Attribution share, post-monsoon</span>
+          <span>${(a.share_post_monsoon * 100).toFixed(1)}%</span></div>
+        <div class="kv"><span>Attribution share, covariates</span>
+          <span>${(a.share_covariates * 100).toFixed(1)}%</span></div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function performanceSection(cx, head) {
+  const comms = cx.communication;
+  const p = cx.model;
+  const rows = comms.map(c => `<tr>
+    <td class="name">${c.algorithm}</td>
+    <td>${c.rounds_run}</td>
+    <td>${c.kb_per_round.toFixed(1)}</td>
+    <td>${c.total_mb.toFixed(1)}</td>
+    <td>${c.s_per_round.toFixed(2)}</td>
+    <td>${c.wall_clock_s.toFixed(0)}</td></tr>`).join("");
+
+  const heaviest = cx.parameters.slice().sort((a, b) => b.share_pct - a.share_pct)[0];
+
+  return `<section>
+    <h2>System performance <span class="tag">R2</span></h2>
+    <p class="lede">The model is deliberately small. Communication cost per round is a
+      function of parameter count alone, independent of dataset size, which is the
+      argument for a compact recurrent model over a transformer.</p>
+    <div class="cols-3">
+      <div class="card">
+        <div class="kv"><span>Total parameters</span><span>${F.i(p.total_parameters)}</span></div>
+        <div class="kv"><span>Shared base</span><span>${F.i(p.base_parameters)}</span></div>
+        <div class="kv"><span>Personalised head</span><span>${F.i(p.head_parameters)}</span></div>
+        <div class="kv"><span>State dict</span><span>${p.state_dict_kb} KB</span></div>
+        <div class="kv"><span>Heaviest tensor</span>
+          <span>${heaviest.share_pct}% · ${heaviest.parameter.split(".").pop()}</span></div>
+      </div>
+      <div class="card">
+        <div class="kv"><span>Inference</span><span>${cx.inference.ms_per_sample} ms/sample</span></div>
+        <div class="kv"><span>Batch ${cx.inference.batch_size}</span>
+          <span>${(cx.inference.batch_seconds * 1000).toFixed(0)} ms</span></div>
+        <div class="kv"><span>Forward cost</span><span>${p.forward_cost}</span></div>
+        <div class="kv"><span>GRU FLOPs/sample</span><span>${F.i(p.gru_flops_per_sample)}</span></div>
+        <div class="kv"><span>FedPer shares</span><span>${p.fedper_shared_pct}% of weights</span></div>
+      </div>
+      <div class="card">
+        <div class="kv"><span>Federated clients</span><span>${head.clients_federated} of ${head.states}</span></div>
+        <div class="kv"><span>Rows after cleaning</span><span>${F.i(head.rows)}</span></div>
+        <div class="kv"><span>Districts</span><span>${head.districts}</span></div>
+        <div class="kv"><span>Features</span><span>${head.n_features}</span></div>
+        <div class="kv"><span>FedPer comm. saving</span>
+          <span class="pos">${head.comm_saving_pct.toFixed(1)}%</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <table>
+        <thead><tr><th>Algorithm</th><th>Rounds</th><th>KB / round</th>
+          <th>Total MB</th><th>s / round</th><th>Wall clock (s)</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="callout">
+        <strong>FedPer is the cheapest per round and the dearest overall.</strong> It ships
+        ${head.comm_saving_pct.toFixed(1)}% fewer bytes each round by keeping the head local,
+        but converges over more rounds, so total transfer is higher. Per-round cost is the
+        figure that matters on a constrained rural link; total transfer is the figure that
+        matters for training time.
+      </div>
+    </div>
+  </section>`;
+}
+
+function muSection(mu) {
+  const max = Math.max(...mu.map(m => m.param_l2_vs_fedavg));
+  const rows = mu.map(m => `<tr>
+    <td class="name">${m.mu === 0 ? "0 (FedAvg)" : m.mu}</td>
+    <td>${F.n(m.r2)}</td>
+    <td class="${m.skill_vs_trend >= 0 ? "pos" : "neg"}">${F.sg(m.skill_vs_trend)}</td>
+    <td>${m.param_l2_vs_fedavg.toFixed(2)}</td>
+    <td><span class="bar" style="width:110px"><i style="left:0;width:${
+      Math.max(2, m.param_l2_vs_fedavg / max * 110)}px;background:var(--muted)"></i></span></td>
+    <td>${m.rounds}</td></tr>`).join("");
+
+  return `<div class="card">
+    <h2 style="font-size:16px;margin-bottom:10px">FedProx μ sweep</h2>
+    <table>
+      <thead><tr><th class="plain">μ</th><th>R²</th><th>Skill</th><th>L2 drift from FedAvg</th>
+        <th></th><th>Rounds</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="callout warn">
+      <strong>The proximal term is active, and monotonically harmful.</strong> Drift from
+      the FedAvg solution rises with μ, confirming the term is doing something rather than
+      sitting inert, and skill falls at every step. Constraining clients toward the global
+      model hurts; personalising away from it helps.
+    </div>
+  </div>`;
+}
+
+function confoundSection(cf) {
+  const rows = cf.rows.map(r => `<tr>
+    <td class="name">${r.variable.replace(/_/g, " ")} · ${r.month}</td>
+    <td>${F.sg(r.pooled_r)}</td>
+    <td>${F.sg(r.within_district_r)}</td>
+    <td>${r.sign_flip ? '<span class="pill no">sign flip</span>' : '<span class="sd">attenuated</span>'}</td>
+  </tr>`).join("");
+
+  return `<div class="card">
+    <h2 style="font-size:16px;margin-bottom:10px">Pooling confound</h2>
+    <p class="lede" style="font-size:12.5px">The ${cf.n_total} month-variable pairs ranked by
+      how far the pooled correlation sits from the within-district one.</p>
+    <table>
+      <thead><tr><th>Variable · month</th><th>Pooled r</th><th>Within-district r</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="callout">
+      <strong>Why the federation is posed by state.</strong> Pooled across districts, wet
+      months look harmful and post-monsoon months look decisive. Both are artifacts of wet
+      districts being rainfed and low-yielding. Removing each district's own mean inverts
+      the sign. This is the heterogeneity the project argues should be preserved rather
+      than averaged away.
+    </div>
+  </div>`;
+}
+
+function statusSection(health) {
+  const order = ["meta","baselines","ablation","agreement","complexity","mu_sweep",
+                 "fidelity","confound","heterogeneity","attributions","federation_history",
+                 "ood","perturbation","significance"];
+  const cells = order.map(k => {
+    const s = health.artifacts[k];
+    if (!s) return "";
+    return `<div class="st"><b>${k.replace(/_/g, " ")}</b>
+      <span class="pill ${s.present ? "ok" : "no"}">${s.present ? "built" : "not run"}</span></div>`;
+  }).join("");
+
+  const missing = health.missing_optional.filter(m =>
+    ["ood","perturbation","significance"].includes(m));
+
+  return `<section>
+    <h2>Pipeline status <span class="tag">R1</span></h2>
+    <p class="lede">What the API is actually serving. Stages that have not been run are
+      reported as such rather than rendered as empty panels.</p>
+    <div class="card">
+      <div class="grid-status">${cells}</div>
+      ${missing.length ? `<div class="callout warn">
+        <strong>Stage F and G artifacts are absent from this build:</strong>
+        ${missing.join(", ")}. The climate-stress, perturbation and significance figures
+        quoted elsewhere in the project were produced locally but their generating modules
+        and outputs are not in the repository, so the dashboard cannot serve them.
+      </div>` : ""}
+    </div>
+  </section>`;
+}
+
+async function main() {
+  const app = document.getElementById("app");
+  let d;
+  try {
+    const res = await fetch("/api/bundle");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    d = await res.json();
+  } catch (e) {
+    app.innerHTML = `<div class="loading">Could not reach the API (${e.message}).<br>
+      Start it with <code>uvicorn backend.app:app --reload</code>.</div>`;
+    return;
+  }
+
+  const h = d.headline;
+  app.innerHTML = `
+    <header>
+      <p class="eyebrow">Federated &amp; Explainable AI · Crop Yield Analytics</p>
+      <h1>Evaluation Results</h1>
+      <p class="sub">ICRISAT district panel · ${h.districts} districts ·
+        ${h.clients_federated} federated clients of ${h.states} states ·
+        ${h.year_min}–${h.year_max} · ${F.i(h.rows)} rows after cleaning</p>
+      <div class="stats">
+        <div class="stat"><div class="v">${F.n(h.best_r2, 3)}</div>
+          <div class="k">Best R², centralised</div></div>
+        <div class="stat"><div class="v pos">${F.sg(h.best_skill)}</div>
+          <div class="k">Skill vs trend baseline</div></div>
+        <div class="stat"><div class="v">${F.i(h.parameters)}</div>
+          <div class="k">Model parameters</div></div>
+        <div class="stat"><div class="v">${h.ms_per_sample}</div>
+          <div class="k">ms per sample</div></div>
+        <div class="stat"><div class="v">${h.comm_saving_pct.toFixed(1)}%</div>
+          <div class="k">FedPer comm. saving</div></div>
+        <div class="stat"><div class="v">${h.seeds}</div>
+          <div class="k">Seeds per arm</div></div>
+      </div>
+    </header>
+    ${ablationSection(d.ablation)}
+    ${agreementSection(d.agreement)}
+    ${performanceSection(d.complexity, h)}
+    <section>
+      <h2>Supporting analysis</h2>
+      <p class="lede">The μ sweep verifies FedProx is behaving as specified; the confound
+        table is the empirical basis for federating by state.</p>
+      <div class="cols">${muSection(d.mu_sweep)}${confoundSection(d.confound)}</div>
+    </section>
+    ${statusSection(d.health)}
+    <footer>
+      <span>fedcrop · results served from frozen artifacts, no model in the container</span>
+      <span>Reference baseline: ${d.ablation.reference_model.replace(/_/g, " ")} ·
+        feature group: ${d.ablation.feature_group}</span>
+    </footer>`;
+}
+main();
+</script>
+</body>
+</html>

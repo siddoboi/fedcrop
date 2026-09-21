@@ -9,11 +9,11 @@ Generated from `artifacts/results/` — 10,223 rows, 501 districts, 20 states, 1
 | Component | Files | Lines |
 |---|---:|---:|
 | Pipeline package `src/fedcrop/` | 24 | 2,273 |
-| Executable scripts `scripts/` | 8 | 1,618 |
-| Results service `backend/` | 1 | 365 |
-| Tests `tests/` | 2 | 493 |
-| Dashboard `frontend/index.html` | 1 | 489 |
-| **Total Python** | **35** | **4,749** |
+| Executable scripts `scripts/` | 9 | 2,276 |
+| Results service `backend/` | 1 | 421 |
+| Tests `tests/` | 2 | 543 |
+| Frontend `frontend/*.html` | 2 | 765 |
+| **Total Python** | **36** | **5,513** |
 
 ### Stage status
 
@@ -26,8 +26,8 @@ Generated from `artifacts/results/` — 10,223 rows, 501 districts, 20 states, 1
 | E | Attribution, agreement, fidelity, agronomic check | `04_explain.py` | complete | agreement.json, fidelity.json, attributions.json |
 | F | Climate-stress OOD and perturbation | `05_evaluate.py` | **not in repository** | ood.json, perturbation.json absent |
 | G | Significance testing and results export | `05_evaluate.py` | **not in repository** | significance.json absent |
-| H | Results API | `backend/app.py` | complete, minimum scope | 14 routes, 26 tests |
-| I | Dashboard | `frontend/index.html` | complete, reduced scope | one page instead of five views |
+| H | Results API | `backend/app.py` | complete, minimum scope | 14 routes, 27 API tests |
+| I | Public page and results dashboard | `frontend/index.html, results.html` | complete, reduced scope | two pages instead of five views |
 
 ### Verification
 
@@ -37,9 +37,11 @@ The test suite is written against the failures that do not crash. A global scale
 
 ### Scope decisions, stated rather than discovered
 
-**The dashboard is one page, not five.** The plan specified React and Vite with Overview, Federated learning, Yield prediction, Explainable AI and Climate conditions views. Delivered instead is a single page carrying the predictive comparison, the attribution agreement, the performance figures and the pipeline status. A working single view demonstrates the full path from artifact to render; five scaffolded views would not.
+**Two pages, not five views, and they serve different readers.** The plan specified React and Vite with Overview, Federated learning, Yield prediction, Explainable AI and Climate conditions views. Delivered instead are two: a public page at `/` that reports, for a chosen state, its yield profile, the driver ranking the federated model learned there and how predictable it has been; and the evaluation dashboard at `/results` carrying the arm comparison, attribution agreement, performance figures and pipeline status. Splitting them this way keeps the evaluation view honest, since it is written for the project team and does not have to be softened for a general reader, while the public page shows what a deployed version of this work would actually put in front of someone.
 
-**No build step.** One HTML file, no framework, no CDN, charts drawn as inline SVG. It renders offline and will render unchanged in six months. The cost is that component reuse would be awkward if the remaining views were added later.
+**The public page reports, it does not forecast.** No model is loaded in the service, so there is no live inference and no predicted yield for a future season. Every figure it shows is measured from the 1990-2015 panel or read from a trained model's committed attributions, and the page says so on its face. Presenting a forecast would have meant inventing one.
+
+**No build step.** Plain HTML, no framework, no CDN, charts drawn as inline SVG. Both pages render offline and will render unchanged in six months. The cost is that component reuse would be awkward if the remaining views were added later.
 
 **No model in the service.** Every scenario the dashboard shows is precomputed, so the API reads frozen JSON and holds no PyTorch dependency. This keeps the container small and makes the service reproducible, at the cost of not supporting live inference on user-supplied input.
 
@@ -47,7 +49,7 @@ The test suite is written against the failures that do not crash. A global scale
 
 Two are worth stating before a reader finds them.
 
-**Stages F and G are not in the repository.** The climate-stress degradation, the perturbation response and the Wilcoxon significance tests were produced during development, but `src/fedcrop/evaluation/`, `src/fedcrop/export/` and `scripts/05_evaluate.py` are not committed, and neither are `ood.json`, `perturbation.json` or `significance.json`. Those figures are therefore quoted nowhere in the R2 and R3 sections above. The service declares the three artifacts as optional and reports them as not built, which is why the dashboard shows an explicit 'not run' state for them rather than an empty panel.
+**Stages F and G do not exist, checked on both machines this project has been developed on.** An earlier project summary described climate-stress degradation, perturbation response and Wilcoxon significance results as complete. Neither `src/fedcrop/evaluation/`, `src/fedcrop/export/` nor `scripts/05_evaluate.py` is present in this repository or in the local working copy, and `git status` on the development machine shows no untracked files matching this stage either. The figures in that earlier summary have no artifact behind them and are not quoted anywhere in the R2 or R3 sections above. The service declares `ood.json`, `perturbation.json` and `significance.json` as optional and reports them as not built, which is why the dashboard shows an explicit 'not run' state for them rather than an empty panel.
 
 **The feature-group ablation outputs are not committed.** `scripts/03_train_all.py --features {climate,covariates,none}` writes `ablation_{features}.json`, but only the full-feature `ablation.json` is in `artifacts/results/`, so the comparison has to be re-run to be cited. A related defect was fixed: the same non-`all` runs used to overwrite `complexity.json` and `federation_history.json` with the reduced model's figures, silently changing the numbers R2 reports. Both are now suffixed the same way as the ablation file.
 

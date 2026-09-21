@@ -321,6 +321,56 @@ def clients() -> dict[str, Any]:
     return {"rows": rows, "n": len(rows)}
 
 
+@app.get("/api/state/{name}")
+def state_view(name: str) -> dict[str, Any]:
+    """Everything the public page shows for one state.
+
+    Reported, not predicted. The service holds no model, so this endpoint
+    returns what was measured on 1990-2015 records for that client: its yield
+    profile, the driver ranking the federated model learned there, and how
+    predictable the state was for the trend baseline.
+    """
+    meta = load_artifact("meta")
+    if name not in meta["clients"]:
+        raise HTTPException(status_code=404, detail=f"unknown state '{name}'")
+
+    profile = meta["clients"][name]
+    attrs = load_artifact("attributions")
+
+    # FedPer is the federated arm that keeps a local head, so its per-client
+    # ranking is the one that reflects this state rather than the average.
+    drivers, source = [], None
+    for arm in ("fedper", "centralised", "fedavg"):
+        per_client = attrs.get("per_client", {}).get(arm, {})
+        if name in per_client:
+            ranked = sorted(per_client[name].items(), key=lambda kv: -kv[1])[:8]
+            total = sum(v for _, v in per_client[name].items()) or 1.0
+            drivers = [{"feature": f, "attribution": v, "share": v / total}
+                       for f, v in ranked]
+            source = arm
+            break
+
+    trend = next((t for t in load_artifact("baselines")["per_client_trend"]
+                  if t["client"] == name), None)
+
+    national = attrs.get("global", {}).get(source or "centralised", {})
+    national_top = [f for f, _ in sorted(national.items(), key=lambda kv: -kv[1])[:8]]
+
+    yields = [c["mean_yield"] for c in meta["clients"].values()]
+    rank = sorted(yields, reverse=True).index(profile["mean_yield"]) + 1
+
+    return {
+        "state": name,
+        "profile": {**profile, "yield_rank": rank, "n_states": len(yields)},
+        "drivers": drivers,
+        "driver_source": source,
+        "attribution_available": bool(drivers),
+        "trend_baseline": trend,
+        "national_top_features": national_top,
+        "record": {"year_min": meta["year_min"], "year_max": meta["year_max"]},
+    }
+
+
 @app.get("/api/results/{name}")
 def raw_artifact(name: str) -> Any:
     if name not in ARTIFACTS:
@@ -360,6 +410,12 @@ if FRONTEND_DIR.exists():
 
     @app.get("/")
     def index() -> FileResponse:
+        """Public-facing page: what the model learned, per state."""
         return FileResponse(FRONTEND_DIR / "index.html")
+
+    @app.get("/results")
+    def results_page() -> FileResponse:
+        """Project-team view: the full evaluation dashboard."""
+        return FileResponse(FRONTEND_DIR / "results.html")
 
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")

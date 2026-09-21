@@ -17,6 +17,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "screenshots"
 
+PUBLIC_SECTIONS = [
+    ("header", "public_01_header"),
+    ("section:nth-of-type(1)", "public_02_profile"),
+    ("section:nth-of-type(2)", "public_03_drivers"),
+    ("section:nth-of-type(3)", "public_04_reliability"),
+]
+
 SECTIONS = [
     ("header", "01_header"),
     ("section:nth-of-type(1)", "02_predictive"),
@@ -64,6 +71,30 @@ def main() -> int:
 
         if errors:
             print("JavaScript errors on the page, screenshots will be wrong:")
+            for e in errors:
+                print("  -", e)
+            browser.close()
+            return 1
+
+        page.screenshot(path=str(OUT / "public_full.png"), full_page=True)
+        print("wrote public_full.png")
+        for selector, name in PUBLIC_SECTIONS:
+            el = page.query_selector(selector)
+            if el is None:
+                print(f"  [skip] {name}: no element matching {selector}")
+                continue
+            el.screenshot(path=str(OUT / f"{name}.png"))
+            print(f"wrote {name}.png")
+
+        try:
+            page.goto(url + "results", wait_until="networkidle")
+        except Exception as exc:
+            print(f"could not reach {url}results: {exc}")
+            browser.close()
+            return 1
+        page.wait_for_timeout(1200)
+        if errors:
+            print("JavaScript errors on the results page:")
             for e in errors:
                 print("  -", e)
             browser.close()

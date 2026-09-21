@@ -213,3 +213,53 @@ def test_dashboard_is_served_at_the_root():
 
 def test_api_routes_win_over_the_static_mount():
     assert client.get("/api/health").json()["status"] in {"ok", "degraded"}
+
+
+# ------------------------------------------------------- public state view
+
+def test_state_view_returns_profile_drivers_and_baseline():
+    meta = raw("meta")
+    name = max(meta["clients"], key=lambda c: meta["clients"][c]["rows"])
+    body = client.get(f"/api/state/{name}").json()
+    assert body["state"] == name
+    assert body["profile"]["rows"] == meta["clients"][name]["rows"]
+    assert body["trend_baseline"]["client"] == name
+    assert body["attribution_available"] is True
+    assert 1 <= body["profile"]["yield_rank"] <= body["profile"]["n_states"]
+
+
+def test_state_driver_shares_are_fractions_of_that_state_total():
+    """A share above 1 would mean the page is dividing by the wrong total."""
+    meta = raw("meta")
+    name = max(meta["clients"], key=lambda c: meta["clients"][c]["rows"])
+    for d in client.get(f"/api/state/{name}").json()["drivers"]:
+        assert 0.0 <= d["share"] <= 1.0, d
+
+
+def test_state_drivers_are_ranked():
+    meta = raw("meta")
+    name = max(meta["clients"], key=lambda c: meta["clients"][c]["rows"])
+    vals = [d["attribution"] for d in client.get(f"/api/state/{name}").json()["drivers"]]
+    assert vals == sorted(vals, reverse=True)
+
+
+def test_state_without_attribution_says_so_rather_than_inventing_drivers():
+    """Telangana has too few rows to train a client model. The page must not
+    silently fall back to national attributions and present them as local."""
+    meta = raw("meta")
+    tiny = [c for c, v in meta["clients"].items() if v["rows"] < 50]
+    if not tiny:
+        pytest.skip("every client is trainable")
+    body = client.get(f"/api/state/{tiny[0]}").json()
+    assert body["attribution_available"] is False
+    assert body["drivers"] == []
+    assert body["driver_source"] is None
+
+
+def test_unknown_state_is_404():
+    assert client.get("/api/state/Atlantis").status_code == 404
+
+
+def test_both_pages_are_served():
+    assert "Rice Yield Insights" in client.get("/").text
+    assert "Evaluation Results" in client.get("/results").text

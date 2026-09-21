@@ -41,13 +41,18 @@ ROUTES: list[tuple[str, int]] = [
     ("/api/confound", 200),
     ("/api/clients", 200),
     ("/api/bundle", 200),
+    ("/api/state/Uttar%20Pradesh", 200),
+    ("/api/state/Nowhere", 404),        # not a client in the panel
     ("/api/results/meta", 200),
     ("/api/results/ood", 409),          # declared but not generated
     ("/api/results/nonsense", 404),     # not a declared artifact
     ("/", 200),
+    ("/results", 200),
 ]
 
 EXPECTED_SHOTS = [
+    "public_full.png", "public_01_header.png", "public_02_profile.png",
+    "public_03_drivers.png", "public_04_reliability.png",
     "dashboard_full.png", "01_header.png", "02_predictive.png",
     "03_explanation.png", "04_performance.png", "05_supporting.png",
     "06_status.png",
