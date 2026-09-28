@@ -108,12 +108,32 @@ def per_client_deficit_years(df: pd.DataFrame, cfg, k: int = 3,
 
 
 def climate_stress_split(bundle: FeatureBundle, cfg,
-                         deficit: dict[str, list[int]]) -> Splits:
-    """Withhold each client's own deficit years from that client's training."""
+                         deficit: dict[str, list[int]],
+                         val_years: int = 2) -> Splits:
+    """Withhold each client's own deficit years from that client's training.
+
+    The held-out years differ per client by design: that is the point. A
+    national deficit list cannot express clients drifting at different times,
+    because opposite regional signs cancel in the national mean.
+
+    Validation is carved from the most recent NON-deficit years rather than
+    from the held-out set. Using deficit years for early stopping would leak
+    the very distribution the protocol exists to hold out, and the resulting
+    OOD number would be meaningless.
+    """
     states = bundle.keys[cfg.state_key].to_numpy()
     years = bundle.keys[cfg.year_key].to_numpy()
     is_deficit = np.array([y in deficit.get(s, []) for s, y in zip(states, years)])
-    return Splits(train=~is_deficit, val=np.zeros(len(years), bool), test=is_deficit)
+
+    non_deficit_years = sorted(set(years[~is_deficit]))
+    val_cutoff = non_deficit_years[-val_years] if len(non_deficit_years) > val_years \
+        else non_deficit_years[-1]
+    is_val = (~is_deficit) & (years >= val_cutoff)
+
+    log.info("climate stress split: %d train, %d val (years >= %d), %d held-out "
+             "deficit rows", int((~is_deficit & ~is_val).sum()), int(is_val.sum()),
+             val_cutoff, int(is_deficit.sum()))
+    return Splits(train=~is_deficit & ~is_val, val=is_val, test=is_deficit)
 
 
 def partition_by_client(bundle: FeatureBundle, cfg,

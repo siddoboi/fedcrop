@@ -165,6 +165,11 @@ def main() -> int:
     ap.add_argument("--arms", nargs="*", default=ARMS, choices=ARMS)
     ap.add_argument("--mu-sweep", action="store_true",
                     help="sweep the FedProx proximal strength and exit")
+    ap.add_argument("--protocol", default="temporal",
+                    choices=["temporal", "climate_stress"],
+                    help="temporal: train<=2009 test 2012-2015. climate_stress: "
+                         "withhold each client's OWN deficit years from training "
+                         "and evaluate on them (the honest OOD protocol)")
     ap.add_argument("--features", default="all",
                     choices=["all", "climate", "covariates", "none"],
                     help="ablate feature groups: which group the model may see")
@@ -182,7 +187,21 @@ def main() -> int:
         return 1
     clean = io_layer.load_interim(clean_path)
     bundle = features.assemble(clean, cfg)
-    sp = splits.temporal_split(bundle, cfg)
+
+    if args.protocol == "climate_stress":
+        deficit = splits.per_client_deficit_years(clean, cfg)
+        sp = splits.climate_stress_split(bundle, cfg, deficit)
+        n_held = int(sp.test.sum())
+        log.info("CLIMATE STRESS PROTOCOL: each client's own driest years are "
+                 "withheld from training. %d rows held out across %d clients. "
+                 "Models never see these conditions during training, which is "
+                 "what makes this a genuine out-of-distribution test.",
+                 n_held, len(deficit))
+        with open(results_dir / "deficit_years.json", "w") as fh:
+            json.dump(deficit, fh, indent=2)
+    else:
+        sp = splits.temporal_split(bundle, cfg)
+
     clients = prepare_clients(bundle, sp, cfg, out_dir=cfg.path("scalers"))
     if args.features != "all":
         clients = mask_feature_group(clients, args.features)
@@ -194,6 +213,8 @@ def main() -> int:
     if args.mu_sweep:
         return mu_sweep(clients, bundle, cfg, trend, seeds[0], results_dir)
 
+    tag = "" if args.protocol == "temporal" else "_stress"
+    ckpt_tag = tag if args.features == "all" else f"_feat-{args.features}{tag}"
     rows: list[dict] = []
     fed_histories: dict[str, list] = {}
     fed_results_for_complexity: dict = {}
@@ -214,17 +235,17 @@ def main() -> int:
             if arm == "centralised":
                 model, _ = train_centralised(clients, bundle, cfg, seed)
                 preds = predict_centralised(model, clients, "test")
-                torch.save(model.state_dict(), models_dir / f"centralised_seed{seed}.pt")
+                torch.save(model.state_dict(), models_dir / f"centralised{ckpt_tag}_seed{seed}.pt")
             elif arm == "local":
                 models, _ = train_all_local(clients, bundle, cfg, seed)
                 preds = predict_local(models, clients, "test")
                 torch.save({k: m.state_dict() for k, m in models.items()},
-                           models_dir / f"local_seed{seed}.pt")
+                           models_dir / f"local{ckpt_tag}_seed{seed}.pt")
             else:
                 res = run_federation(clients, bundle, cfg, algorithm=arm, seed=seed)
                 preds = federated_predictions(res, clients, bundle, cfg, "test")
                 torch.save({"global": res.global_state, "heads": res.client_heads},
-                           models_dir / f"{arm}_seed{seed}.pt")
+                           models_dir / f"{arm}{ckpt_tag}_seed{seed}.pt")
                 fed_histories.setdefault(arm, []).append(
                     {"seed": seed, "best_round": res.best_round,
                      "rounds": res.rounds_run, "history": res.history})
@@ -250,9 +271,11 @@ def main() -> int:
              len(seeds), summary.to_string())
 
     suffix = "" if args.features == "all" else f"_{args.features}"
+    suffix += tag
     with open(results_dir / f"ablation{suffix}.json", "w") as fh:
         json.dump({"runs": df.replace({np.nan: None}).to_dict(orient="records"),
                    "seeds": list(seeds), "feature_group": args.features,
+                   "protocol": args.protocol,
                    "reference_model": "district_trend"}, fh, indent=2)
     if fed_histories:
         with open(results_dir / f"federation_history{suffix}.json", "w") as fh:
@@ -260,8 +283,6 @@ def main() -> int:
 
     report = complexity.complexity_report(build_model(bundle, cfg),
                                           fed_results_for_complexity or None)
-    # suffixed like ablation: a climate-only run must not overwrite the
-    # complexity figures of the full model, which R2 reports.
     with open(results_dir / f"complexity{suffix}.json", "w") as fh:
         json.dump(report, fh, indent=2)
     log.info("\n=== complexity ===")
@@ -270,8 +291,7 @@ def main() -> int:
     if "communication" in report:
         log.info("\n%s", pd.DataFrame(report["communication"]).to_string(index=False))
 
-    log.info("\nwrote ablation%s.json, federation_history%s.json, complexity%s.json",
-             suffix, suffix, suffix)
+    log.info("\nwrote ablation.json, federation_history.json, complexity.json")
     return 0
 
 

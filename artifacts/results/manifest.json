@@ -1,0 +1,106 @@
+{
+  "ablation.json": {
+    "bytes": 9862,
+    "sha256": "522ca50b0aedefa5"
+  },
+  "ablation_climate.json": {
+    "bytes": 9884,
+    "sha256": "fa73ce0c95d7f047"
+  },
+  "ablation_covariates.json": {
+    "bytes": 9890,
+    "sha256": "00f4e91fbde6a414"
+  },
+  "ablation_none.json": {
+    "bytes": 9881,
+    "sha256": "49b1b67c3eafb96f"
+  },
+  "ablation_stress.json": {
+    "bytes": 9887,
+    "sha256": "f7676a76282d4425"
+  },
+  "agreement.json": {
+    "bytes": 2074,
+    "sha256": "4f22e71c3ab81170"
+  },
+  "attributions.json": {
+    "bytes": 283434,
+    "sha256": "d180fa9b7eff3a67"
+  },
+  "baselines.json": {
+    "bytes": 4129,
+    "sha256": "a5239e7e5237dd46"
+  },
+  "complexity.json": {
+    "bytes": 2601,
+    "sha256": "432863ccd5ab2854"
+  },
+  "complexity_climate.json": {
+    "bytes": 2607,
+    "sha256": "fa816bd2c212b402"
+  },
+  "complexity_covariates.json": {
+    "bytes": 2606,
+    "sha256": "97a5559b06f05946"
+  },
+  "complexity_none.json": {
+    "bytes": 2604,
+    "sha256": "24b8432686c4bfdf"
+  },
+  "confound.json": {
+    "bytes": 6765,
+    "sha256": "c58362bb0799e85d"
+  },
+  "deficit_years.json": {
+    "bytes": 1133,
+    "sha256": "43ad73689248f9c8"
+  },
+  "federation_history.json": {
+    "bytes": 138028,
+    "sha256": "dc1bc7d37f260367"
+  },
+  "federation_history_climate.json": {
+    "bytes": 181152,
+    "sha256": "b0e973a862edb2c1"
+  },
+  "federation_history_covariates.json": {
+    "bytes": 197249,
+    "sha256": "220dfd50cae710d7"
+  },
+  "federation_history_none.json": {
+    "bytes": 105348,
+    "sha256": "6f0c37300989a8da"
+  },
+  "fidelity.json": {
+    "bytes": 4623,
+    "sha256": "bfad6e78b8313f9b"
+  },
+  "heterogeneity.json": {
+    "bytes": 17131,
+    "sha256": "18b7f8e2ba9c1959"
+  },
+  "meta.json": {
+    "bytes": 6446,
+    "sha256": "1758d3d97b4f2a12"
+  },
+  "mu_sweep.json": {
+    "bytes": 1133,
+    "sha256": "2d3abfee6ae009a7"
+  },
+  "ood.json": {
+    "bytes": 265971,
+    "sha256": "5377946cad78d1e7"
+  },
+  "predictions.json": {
+    "bytes": 624286,
+    "sha256": "3f6ed05afe6d0676"
+  },
+  "scenarios.json": {
+    "bytes": 287474,
+    "sha256": "eb49f3aae7fe86ac"
+  },
+  "significance.json": {
+    "bytes": 6718,
+    "sha256": "bc4cf0aeea62b49a"
+  }
+}
