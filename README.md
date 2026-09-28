@@ -42,8 +42,8 @@ own drought years.
 | C-D Training (5 arms x 5 seeds) | `03_train_all.py` | ablation table |
 | E Explainability | `04_explain.py` | seed-control τ |
 | F-G Robustness, freeze | `05_evaluate.py` | Gate G: 11 result files |
-| H Backend | FastAPI (in progress) | |
-| I Frontend | React + Vite (planned) | |
+| H Backend | `backend/app.py`, FastAPI, read-only | 52 API tests |
+| I Frontend | being rebuilt as a separate app | |
 
 ## Setup (Windows, Python 3.12)
 

@@ -10,8 +10,8 @@ from committed JSON in artifacts/results/, not from memory.
 ## Status
 - Stages A-G DONE, tested (59 tests pass), pushed (commit 6c540f3).
 - Gate G passed: 11 of 11 required result files present and valid.
-- Next: Stage H (FastAPI, precomputed only, no torch at request time),
-  then Stage I (React + Vite + Recharts dashboard).
+- Stage H DONE: backend/app.py, pure JSON API, no torch, 52 API tests.
+- Next: Stage I frontend, a separate app calling the API on port 8000.
 
 ## Data (verified)
 - ICRISAT District Level Database, Mendeley DOI 10.17632/ywp3y5j9vv.1.
