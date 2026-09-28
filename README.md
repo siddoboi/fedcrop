@@ -1,66 +1,89 @@
 # fedcrop
 
-Federated and explainable AI for rice yield prediction across Indian districts.
-Stages A and B of the plan in `Implementation_Roadmap_v3.md`.
+**Federated and Explainable AI Framework for Predictive Crop Yield Analytics
+under Climate Change Conditions**
 
-## Setup, Windows 11 + Python 3.12
+District-level rice yield prediction across 19 Indian states (1990-2015), with
+each state acting as a federated client that never shares its data. The project
+compares centralised, local-only and federated training (FedAvg, FedProx,
+FedPer), explains every model with SHAP, and tests robustness to each state's
+own drought years.
 
-```
-py -3.12 -m venv .venv
-.venv\Scripts\activate
+## Headline results (5 seeds, test years 2012-2015)
+
+| Method | R² | Skill vs district trend [95% CI] |
+|---|---|---|
+| Centralised (upper bound, not private) | 0.448 | +0.136 [0.115, 0.158] |
+| Local only | 0.391 | +0.047 [0.023, 0.073] |
+| **FedPer** | 0.364 | +0.005 [-0.015, 0.022] |
+| FedAvg | 0.295 | -0.103 [-0.116, -0.092] |
+| FedProx | 0.292 | -0.108 [-0.119, -0.097] |
+| District trend baseline | 0.348 | 0 (reference) |
+
+- **Heterogeneity dominates.** FedAvg and FedProx are significantly worse than
+  centralised (Wilcoxon p = 0.0002). FedPer, which keeps a personal head per
+  state, is not distinguishable from centralised per state (p = 0.44).
+- **Explanations change under federation.** Feature-ranking agreement with the
+  centralised model (Kendall τ) is 0.51 for FedPer and 0.38 to 0.39 for
+  FedAvg/FedProx, against a seed-to-seed control of 0.72.
+- **Drought robustness.** With each state's own driest years withheld from
+  training, federated models show no measurable loss of R² on those years;
+  local-only models lose 0.076.
+- **Climate signal is confounded.** Pooled and within-district correlations
+  flip sign for several climate variables (Simpson's paradox). Climate helps
+  only in combination with farm covariates.
+
+## Pipeline
+
+| Stage | Script | Gate |
+|---|---|---|
+| A Data verification | `00_verify.py` | 16 checks |
+| B Cleaning, features, baselines | `01_*`, `02_*` | baselines reproduce |
+| C-D Training (5 arms x 5 seeds) | `03_train_all.py` | ablation table |
+| E Explainability | `04_explain.py` | seed-control τ |
+| F-G Robustness, freeze | `05_evaluate.py` | Gate G: 11 result files |
+| H Backend | FastAPI (in progress) | |
+| I Frontend | React + Vite (planned) | |
+
+## Setup (Windows, Python 3.12)
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-The dataset is not in this repo. Download it from
-https://data.mendeley.com/datasets/ywp3y5j9vv/1 and put the `.xls` in
-`data/raw/`. The expected filename is in `config/base.yaml`.
+Place the ICRISAT workbook (`.xls`, Mendeley DOI 10.17632/ywp3y5j9vv.1) in
+`data/raw/`. It is not committed.
 
-## Run, in order
+## Reproduce
 
+```powershell
+python scripts\00_verify.py
+python scripts\03_train_all.py
+python scripts\03_train_all.py --protocol climate_stress
+python scripts\04_explain.py
+python scripts\05_evaluate.py
+python -m pytest -q
 ```
-python scripts/00_verify.py          # Gate A. Must pass before anything else.
-python scripts/01_build_features.py  # cleaning, confound table, meta.json
-python scripts/02_baselines.py       # the three baselines, baselines.json
-python -m pytest tests -q            # leakage and naming guards
-```
 
-`00_verify.py` reproduces sixteen documented constants from the loader itself.
-If it fails, the loader is wrong and nothing downstream is meaningful.
+Training is seeded and deterministic: a full retrain reproduces the committed
+ablation table exactly.
 
-## What is here
+## Key protocol choices
 
-| Module | Purpose |
-|---|---|
-| `columns.py` | Source column names. Handles the windspeed abbreviations and the `PERCIPITATION` typo. `feature_names()` is the single source of truth for attribution labels. |
-| `io_layer.py` | Reads the `.xls` once, caches to parquet. |
-| `cleaning.py` | The cleaning cascade with a per-step audit table. Covariates are imputed per client; climate never is. |
-| `features.py` | Assembles the `(N, 12, 5)` sequence tensor and `(N, 9)` covariate matrix into a `FeatureBundle`. |
-| `splits.py` | Temporal splitting, client partitioning, per-client deficit years. |
-| `scaling.py` | Per-client standardisation with `assert_no_global_scaler`. |
-| `baselines.py` | Global mean, district mean, district linear trend. |
-| `metrics.py` | RMSE, MAE, R², skill score, worst-client RMSE, cross-client std. |
+- Temporal split: train 1990-2009, validation 2010-2011, test 2012-2015.
+- Scaling fitted per state on training years only; never across states.
+- Drought years are chosen per state, not nationally, because a national mean
+  cancels opposite regional signals (2015: Karnataka -27.6%, Himachal +21.6%).
+- Drought robustness is measured as R² drop. RMSE falls in drought years for
+  every model because yield varies less, so it is not a fair measure.
+- Climate scenarios are a sensitivity analysis over observed conditions, not a
+  climate projection.
 
-## Measured results
+## Known limitations
 
-Cleaned panel: 10,223 rows, 507 districts, 20 clients. Train 7,579,
-validate 878, test 1,766.
-
-| Baseline | Test R² | RMSE (kg/ha) |
-|---|---|---|
-| Global mean | −0.263 | 1005 |
-| District mean | 0.304 | 746 |
-| **District trend** | **0.348** | **722** |
-
-`district_trend` is the reference for `skill_score`. Every model added later
-is reported against it.
-
-## Rules that are easy to break silently
-
-1. Per-client scaling only. A global scaler does not crash, it invalidates
-   every number. `assert_no_global_scaler` catches it.
-2. Fit scalers on training years only.
-3. Never a random split. Temporal structure.
-4. Never include `RICE PRODUCTION` (yield = production / area).
-5. Never both `TOTAL FERTILISER` and N/P/K (correlation exactly 1.0).
-6. Never impute climate. Drop those rows.
-7. Never report R² without `district_trend` beside it.
+- Climate variables are district-wide means with no cropland mask.
+- Rice yield is annual, not season-specific.
+- Windspeed behaves like a proxy for something else.
+- Telangana has no training years, so 19 of 20 states are federated clients.
