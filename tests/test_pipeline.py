@@ -276,3 +276,63 @@ def test_normalise_makes_clients_comparable():
     small = pd.Series([2.0, 1.0], index=["a", "b"])
     np.testing.assert_allclose(normalise(big).to_numpy(),
                                normalise(small).to_numpy())
+
+
+# ------------------------------------------------------- evaluation and freeze
+
+def test_climate_stress_split_holds_out_per_client_years():
+    import numpy as np
+    from fedcrop import splits
+    cfg = load_config()
+    b = _toy_bundle(cfg, districts=("d1", "d2"), states=("s1", "s2"))
+    deficit = {"s1": [1995, 1996], "s2": [2003]}
+    sp = splits.climate_stress_split(b, cfg, deficit)
+    states = b.keys[cfg.state_key].to_numpy()
+    years = b.keys[cfg.year_key].to_numpy()
+    held = {(s, y) for s, y in zip(states[sp.test], years[sp.test])}
+    assert held == {("s1", 1995), ("s1", 1996), ("s2", 2003)}
+    # held-out years must never appear in training
+    assert not (sp.train & sp.test).any()
+    # validation must not touch the held-out distribution
+    assert not (sp.val & sp.test).any()
+
+
+def test_perturbation_applied_in_raw_units():
+    import numpy as np, pandas as pd
+    from fedcrop.evaluation.perturbation import PRECIP_IDX, TEMP_IDX, perturb
+    from fedcrop.splits import ClientData
+    seq = np.ones((3, 12, 5), np.float32) * 100.0
+    d = ClientData("s1", seq, np.zeros((3, 9), np.float32),
+                   np.zeros(3, np.float32), pd.DataFrame({"Dist Code": range(3)}))
+    out = perturb(d, delta_temp=2.0, rain_pct=-20.0)
+    assert out.x_seq[0, 0, TEMP_IDX] == pytest.approx(102.0)
+    assert out.x_seq[0, 0, PRECIP_IDX] == pytest.approx(80.0)
+    assert d.x_seq[0, 0, TEMP_IDX] == pytest.approx(100.0), "input was mutated"
+
+
+def test_rainfall_cannot_go_negative():
+    import numpy as np, pandas as pd
+    from fedcrop.evaluation.perturbation import PRECIP_IDX, perturb
+    from fedcrop.splits import ClientData
+    seq = np.ones((2, 12, 5), np.float32) * 5.0
+    d = ClientData("s1", seq, np.zeros((2, 9), np.float32),
+                   np.zeros(2, np.float32), pd.DataFrame({"Dist Code": range(2)}))
+    out = perturb(d, rain_pct=-200.0)
+    assert (out.x_seq[:, :, PRECIP_IDX] >= 0).all()
+
+
+def test_gate_g_fails_on_missing_file(tmp_path):
+    from fedcrop.export import results_json as exp
+    ok, problems = exp.validate_exports(tmp_path, strict=False)
+    assert not ok
+    assert len(problems) == len(exp.REQUIRED_EXPORTS)
+
+
+def test_export_cleans_nan_to_null(tmp_path):
+    import numpy as np
+    from fedcrop.export import results_json as exp
+    path = tmp_path / "x.json"
+    exp.write_json({"a": np.float64("nan"), "b": np.int64(3)}, path)
+    import json
+    payload = json.loads(path.read_text())
+    assert payload["a"] is None and payload["b"] == 3
