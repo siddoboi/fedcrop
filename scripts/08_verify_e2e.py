@@ -41,13 +41,22 @@ ROUTES: list[tuple[str, int]] = [
     ("/api/confound", 200),
     ("/api/clients", 200),
     ("/api/bundle", 200),
+    ("/api/ood", 200),
+    ("/api/scenarios", 200),
+    ("/api/scenarios?client=Jharkhand", 200),
+    ("/api/predictions", 200),
+    ("/api/predictions?client=Atlantis", 404),
+    ("/api/significance", 200),
+    ("/api/baselines", 200),
+    ("/api/federation", 200),
+    ("/api/attributions", 200),
     ("/api/state/Uttar%20Pradesh", 200),
     ("/api/state/Nowhere", 404),        # not a client in the panel
     ("/api/results/meta", 200),
-    ("/api/results/ood", 409),          # declared but not generated
+    ("/api/results/ood", 200),
     ("/api/results/nonsense", 404),     # not a declared artifact
     ("/", 200),
-    ("/results", 200),
+    ("/results", 404),                  # frontend is a separate app
 ]
 
 EXPECTED_SHOTS = [
