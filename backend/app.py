@@ -411,7 +411,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -609,3 +609,7 @@ def bundle() -> dict[str, Any]:
         "significance": require("significance"),
         "health": health(),
     }
+
+# CSV upload and live prediction (loads PyTorch on first use only).
+from backend.predict import router as upload_router  # noqa: E402
+app.include_router(upload_router)
