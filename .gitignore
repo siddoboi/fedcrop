@@ -17,3 +17,4 @@ frontend/node_modules/
 frontend/dist/
 demo_data/*.csv
 demo_data/*.csv
+artifacts/results/api_latency.json
