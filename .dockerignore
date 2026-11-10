@@ -1,0 +1,15 @@
+# Send only what the web service needs to the Docker build.
+**
+!src/
+!config/
+!backend/
+!frontend/
+!requirements-docker.txt
+!artifacts/results/*.json
+!artifacts/scalers/scalers.json
+!artifacts/models/*_seed42.pt
+artifacts/models/*_stress_*
+frontend/node_modules
+frontend/dist
+**/__pycache__
+**/*.pyc

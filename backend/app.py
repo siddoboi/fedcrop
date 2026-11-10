@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import statistics as stats
 from functools import lru_cache
 from pathlib import Path
@@ -613,3 +614,30 @@ def bundle() -> dict[str, Any]:
 # CSV upload and live prediction (loads PyTorch on first use only).
 from backend.predict import router as upload_router  # noqa: E402
 app.include_router(upload_router)
+
+
+# --------------------------------------------------------------------------
+# built frontend (Docker image only)
+# --------------------------------------------------------------------------
+# When FEDCROP_FRONTEND_DIR points at a Vite build, this service also serves
+# the React app, so one container answers both "/" and "/api/*" on one port.
+# It is unset in development and in tests, where "/" stays the JSON index.
+
+_FRONTEND_DIR = os.environ.get("FEDCROP_FRONTEND_DIR")
+if _FRONTEND_DIR and (Path(_FRONTEND_DIR) / "index.html").is_file():
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    _dist = Path(_FRONTEND_DIR)
+    app.router.routes = [r for r in app.router.routes if getattr(r, "path", None) != "/"]
+
+    @app.get("/", include_in_schema=False)
+    def frontend_index() -> FileResponse:
+        return FileResponse(_dist / "index.html")
+
+    @app.get("/api", include_in_schema=False)
+    def api_index() -> dict[str, Any]:
+        return index()
+
+    if (_dist / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=_dist / "assets"), name="assets")

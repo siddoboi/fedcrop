@@ -1,0 +1,10 @@
+# Runtime dependencies of the web service only (no training, tests or data tools).
+# PyTorch is installed separately in the Dockerfile from the CPU-only index.
+numpy>=1.24
+pandas>=2.0
+PyYAML>=6.0
+captum>=0.7
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+scipy>=1.11
