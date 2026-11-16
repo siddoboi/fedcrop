@@ -320,5 +320,168 @@
       "worst_state": "Tamil Nadu",
       "worst_state_removed": 79
     }
-  ]
+  ],
+  "missing_codes": {
+    "strategy": "impute",
+    "codes": [
+      -1.0
+    ],
+    "values_by_column": {
+      "GROSS IRRIGATED AREA (1000 ha)": 730,
+      "NITROGEN CONSUMPTION (tons)": 144,
+      "PHOSPHATE CONSUMPTION (tons)": 144,
+      "POTASH CONSUMPTION (tons)": 145
+    },
+    "rows_affected": 870,
+    "rows_affected_by_state": {
+      "West Bengal": 381,
+      "Assam": 237,
+      "Bihar": 86,
+      "Jharkhand": 58,
+      "Haryana": 23,
+      "Himachal Pradesh": 15,
+      "Maharashtra": 15,
+      "Kerala": 14,
+      "Uttar Pradesh": 12,
+      "Tamil Nadu": 11,
+      "Telangana": 9,
+      "Rajasthan": 6,
+      "Uttarakhand": 3
+    }
+  },
+  "imputation_support": {
+    "Andhra Pradesh": {
+      "train_rows": 260,
+      "GROSS IRRIGATED AREA (1000 ha)": 260,
+      "NITROGEN CONSUMPTION (tons)": 260,
+      "PHOSPHATE CONSUMPTION (tons)": 260,
+      "POTASH CONSUMPTION (tons)": 260
+    },
+    "Assam": {
+      "train_rows": 476,
+      "GROSS IRRIGATED AREA (1000 ha)": 45,
+      "NITROGEN CONSUMPTION (tons)": 467,
+      "PHOSPHATE CONSUMPTION (tons)": 467,
+      "POTASH CONSUMPTION (tons)": 467
+    },
+    "Bihar": {
+      "train_rows": 715,
+      "GROSS IRRIGATED AREA (1000 ha)": 715,
+      "NITROGEN CONSUMPTION (tons)": 630,
+      "PHOSPHATE CONSUMPTION (tons)": 630,
+      "POTASH CONSUMPTION (tons)": 630
+    },
+    "Chhattisgarh": {
+      "train_rows": 156,
+      "GROSS IRRIGATED AREA (1000 ha)": 156,
+      "NITROGEN CONSUMPTION (tons)": 154,
+      "PHOSPHATE CONSUMPTION (tons)": 154,
+      "POTASH CONSUMPTION (tons)": 154
+    },
+    "Gujarat": {
+      "train_rows": 263,
+      "GROSS IRRIGATED AREA (1000 ha)": 263,
+      "NITROGEN CONSUMPTION (tons)": 263,
+      "PHOSPHATE CONSUMPTION (tons)": 263,
+      "POTASH CONSUMPTION (tons)": 263
+    },
+    "Haryana": {
+      "train_rows": 318,
+      "GROSS IRRIGATED AREA (1000 ha)": 317,
+      "NITROGEN CONSUMPTION (tons)": 317,
+      "PHOSPHATE CONSUMPTION (tons)": 317,
+      "POTASH CONSUMPTION (tons)": 317
+    },
+    "Himachal Pradesh": {
+      "train_rows": 161,
+      "GROSS IRRIGATED AREA (1000 ha)": 141,
+      "NITROGEN CONSUMPTION (tons)": 161,
+      "PHOSPHATE CONSUMPTION (tons)": 161,
+      "POTASH CONSUMPTION (tons)": 161
+    },
+    "Jharkhand": {
+      "train_rows": 214,
+      "GROSS IRRIGATED AREA (1000 ha)": 196,
+      "NITROGEN CONSUMPTION (tons)": 152,
+      "PHOSPHATE CONSUMPTION (tons)": 152,
+      "POTASH CONSUMPTION (tons)": 152
+    },
+    "Karnataka": {
+      "train_rows": 447,
+      "GROSS IRRIGATED AREA (1000 ha)": 447,
+      "NITROGEN CONSUMPTION (tons)": 447,
+      "PHOSPHATE CONSUMPTION (tons)": 447,
+      "POTASH CONSUMPTION (tons)": 447
+    },
+    "Kerala": {
+      "train_rows": 280,
+      "GROSS IRRIGATED AREA (1000 ha)": 280,
+      "NITROGEN CONSUMPTION (tons)": 280,
+      "PHOSPHATE CONSUMPTION (tons)": 280,
+      "POTASH CONSUMPTION (tons)": 280
+    },
+    "Madhya Pradesh": {
+      "train_rows": 606,
+      "GROSS IRRIGATED AREA (1000 ha)": 606,
+      "NITROGEN CONSUMPTION (tons)": 606,
+      "PHOSPHATE CONSUMPTION (tons)": 606,
+      "POTASH CONSUMPTION (tons)": 606
+    },
+    "Maharashtra": {
+      "train_rows": 482,
+      "GROSS IRRIGATED AREA (1000 ha)": 316,
+      "NITROGEN CONSUMPTION (tons)": 482,
+      "PHOSPHATE CONSUMPTION (tons)": 482,
+      "POTASH CONSUMPTION (tons)": 482
+    },
+    "Orissa": {
+      "train_rows": 515,
+      "GROSS IRRIGATED AREA (1000 ha)": 515,
+      "NITROGEN CONSUMPTION (tons)": 515,
+      "PHOSPHATE CONSUMPTION (tons)": 515,
+      "POTASH CONSUMPTION (tons)": 515
+    },
+    "Punjab": {
+      "train_rows": 329,
+      "GROSS IRRIGATED AREA (1000 ha)": 329,
+      "NITROGEN CONSUMPTION (tons)": 327,
+      "PHOSPHATE CONSUMPTION (tons)": 327,
+      "POTASH CONSUMPTION (tons)": 327
+    },
+    "Rajasthan": {
+      "train_rows": 169,
+      "GROSS IRRIGATED AREA (1000 ha)": 169,
+      "NITROGEN CONSUMPTION (tons)": 168,
+      "PHOSPHATE CONSUMPTION (tons)": 168,
+      "POTASH CONSUMPTION (tons)": 168
+    },
+    "Tamil Nadu": {
+      "train_rows": 489,
+      "GROSS IRRIGATED AREA (1000 ha)": 489,
+      "NITROGEN CONSUMPTION (tons)": 488,
+      "PHOSPHATE CONSUMPTION (tons)": 488,
+      "POTASH CONSUMPTION (tons)": 488
+    },
+    "Uttar Pradesh": {
+      "train_rows": 1221,
+      "GROSS IRRIGATED AREA (1000 ha)": 1213,
+      "NITROGEN CONSUMPTION (tons)": 1219,
+      "PHOSPHATE CONSUMPTION (tons)": 1219,
+      "POTASH CONSUMPTION (tons)": 1219
+    },
+    "Uttarakhand": {
+      "train_rows": 130,
+      "GROSS IRRIGATED AREA (1000 ha)": 130,
+      "NITROGEN CONSUMPTION (tons)": 130,
+      "PHOSPHATE CONSUMPTION (tons)": 130,
+      "POTASH CONSUMPTION (tons)": 130
+    },
+    "West Bengal": {
+      "train_rows": 348,
+      "GROSS IRRIGATED AREA (1000 ha)": 12,
+      "NITROGEN CONSUMPTION (tons)": 341,
+      "PHOSPHATE CONSUMPTION (tons)": 341,
+      "POTASH CONSUMPTION (tons)": 341
+    }
+  }
 }

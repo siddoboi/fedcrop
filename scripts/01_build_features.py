@@ -61,8 +61,21 @@ def main() -> int:
     confound.to_json(results_dir / "confound.json", orient="records", indent=2)
 
     log.info("\n--- cleaning ---")
-    work = cleaning.add_derived(cleaning.drop_excluded(raw))
+    # Missing-value codes are recoded before add_derived, so no ratio is ever
+    # computed from -1. With strategy "keep" this is a no-op and the order of
+    # operations is exactly the one behind the report v5 results.
+    work, codes_report = cleaning.recode_missing_codes(cleaning.drop_excluded(raw), cfg)
+    work = cleaning.add_derived(work)
     clean, audit = cleaning.apply_cascade(work, cfg)
+    support = cleaning.imputation_support(clean, cfg)
+    if codes_report["strategy"] == "impute":
+        log.info("\n--- imputation support: real training values per state ---")
+        for state, n in sorted(support.items(),
+                               key=lambda kv: kv[1]["GROSS IRRIGATED AREA (1000 ha)"]):
+            irr = n["GROSS IRRIGATED AREA (1000 ha)"]
+            if irr < n["train_rows"]:
+                log.info("  %-20s irrigated area %4d of %4d training rows%s", state, irr,
+                         n["train_rows"], "   <- median of very few values" if irr < 20 else "")
     clean = cleaning.impute_per_client(clean, cfg)
     io_layer.to_parquet(clean, cfg.path("interim").with_name("clean.parquet"))
 
@@ -91,6 +104,8 @@ def main() -> int:
             for name, c in clients.items()
         },
         "cleaning_audit": audit.to_dict(orient="records"),
+        "missing_codes": codes_report,
+        "imputation_support": support,
     }
     with open(results_dir / "meta.json", "w") as fh:
         json.dump(meta, fh, indent=2)

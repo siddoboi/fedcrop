@@ -4,9 +4,11 @@ Order matters and is fixed. Every step logs rows removed, per state, into an
 audit table that belongs in the report appendix: disproportionate loss in
 specific states is a result, not a footnote.
 
-Two rules that are easy to get wrong and fail silently:
+Rules that are easy to get wrong and fail silently:
   - climate is never imputed (it is the variable under study)
   - the outlier threshold is computed on training years only
+  - the source writes -1 for "not recorded" in some farm columns; it must be
+    recoded before add_derived, or the ratios are computed from it
 """
 
 from __future__ import annotations
@@ -19,6 +21,84 @@ import pandas as pd
 from . import columns as C
 
 log = logging.getLogger(__name__)
+
+# Farm columns where the source uses a numeric code for "not recorded".
+# Climate is never listed here: it is dropped when missing, never imputed.
+MISSING_CODE_COLUMNS = [
+    "GROSS IRRIGATED AREA (1000 ha)",
+    "NITROGEN CONSUMPTION (tons)",
+    "PHOSPHATE CONSUMPTION (tons)",
+    "POTASH CONSUMPTION (tons)",
+]
+MISSING_CODE_FLAG = "__had_missing_code"
+STRATEGIES = ("impute", "drop", "keep")
+
+
+def missing_code_settings(cfg) -> tuple[list[float], str]:
+    """(codes, strategy). A config without the keys keeps the old behaviour."""
+    c = cfg["cleaning"]
+    codes = [float(v) for v in c.get("missing_codes", [-1])]
+    strategy = c.get("missing_code_strategy", "keep")
+    if strategy not in STRATEGIES:
+        raise ValueError(f"missing_code_strategy {strategy!r}; expected one of {STRATEGIES}")
+    return codes, strategy
+
+
+def recode_missing_codes(df: pd.DataFrame, cfg) -> tuple[pd.DataFrame, dict]:
+    """Turn the source's missing-value codes into NaN in MISSING_CODE_COLUMNS.
+
+    keep:   frame returned unchanged; the codes are only counted.
+    impute: codes become NaN, later filled by impute_per_client.
+    drop:   codes become NaN and rows are flagged; apply_cascade removes them.
+
+    Must run before add_derived. Returns the frame and a report for meta.json.
+    """
+    codes, strategy = missing_code_settings(cfg)
+    cols = [c for c in MISSING_CODE_COLUMNS if c in df.columns]
+    hit = df[cols].isin(codes)
+    any_hit = hit.any(axis=1)
+    report = {
+        "strategy": strategy,
+        "codes": codes,
+        "values_by_column": {c: int(hit[c].sum()) for c in cols},
+        "rows_affected": int(any_hit.sum()),
+        "rows_affected_by_state": {
+            k: int(v) for k, v in
+            any_hit.groupby(df[cfg.state_key]).sum().sort_values(ascending=False).items() if v > 0
+        },
+    }
+    log.info("missing codes %s: %d rows affected, strategy %s",
+             codes, report["rows_affected"], strategy)
+    for c in cols:
+        log.info("  %-34s %d", c, report["values_by_column"][c])
+    if strategy == "keep":
+        return df, report
+
+    df = df.copy()
+    df[cols] = df[cols].mask(hit)
+    if strategy == "drop":
+        df[MISSING_CODE_FLAG] = any_hit
+    return df, report
+
+
+def imputation_support(df: pd.DataFrame, cfg,
+                       cols: list[str] | None = None) -> dict[str, dict[str, int]]:
+    """Per state, how many real training-year values each imputed column has.
+
+    impute_per_client fills with the median of these. A state with only a
+    handful gets an almost constant column: say so instead of hiding it.
+    Call before impute_per_client.
+    """
+    cols = [c for c in (cols or MISSING_CODE_COLUMNS) if c in df.columns]
+    lo, hi = cfg.train_years
+    train = df[(df[cfg.year_key] >= lo) & (df[cfg.year_key] <= hi)]
+    counts = train.groupby(cfg.state_key)[cols].count()
+    rows = train.groupby(cfg.state_key).size()
+    out = {}
+    for state in counts.index:
+        out[state] = {"train_rows": int(rows[state]),
+                      **{c: int(counts.at[state, c]) for c in cols}}
+    return out
 
 
 def drop_excluded(df: pd.DataFrame) -> pd.DataFrame:
@@ -94,6 +174,11 @@ def apply_cascade(df: pd.DataFrame, cfg) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     before, work = work, work[work[target].notna()]
     record("target not null", before, work)
+
+    if MISSING_CODE_FLAG in work.columns:
+        before, work = work, work[~work[MISSING_CODE_FLAG]]
+        record("no missing-value code", before, work)
+        work = work.drop(columns=MISSING_CODE_FLAG)
 
     if cfg["cleaning"]["drop_zero_yield"]:
         before, work = work, work[work[target] > 0]
