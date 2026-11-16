@@ -1,7 +1,7 @@
 {
   "ablation.json": {
-    "bytes": 9862,
-    "sha256": "522ca50b0aedefa5"
+    "bytes": 9896,
+    "sha256": "999c0bfc2ac43b9a"
   },
   "ablation_climate.json": {
     "bytes": 9884,
@@ -16,24 +16,28 @@
     "sha256": "49b1b67c3eafb96f"
   },
   "ablation_stress.json": {
-    "bytes": 9887,
-    "sha256": "f7676a76282d4425"
+    "bytes": 9884,
+    "sha256": "d444668dad9b6941"
   },
   "agreement.json": {
-    "bytes": 2074,
-    "sha256": "4f22e71c3ab81170"
+    "bytes": 2014,
+    "sha256": "65c595e3fddef8a8"
+  },
+  "api_latency.json": {
+    "bytes": 905,
+    "sha256": "1b627ef3fcc9fad9"
   },
   "attributions.json": {
-    "bytes": 283434,
-    "sha256": "d180fa9b7eff3a67"
+    "bytes": 283231,
+    "sha256": "affb3f137e91ac57"
   },
   "baselines.json": {
     "bytes": 4129,
     "sha256": "a5239e7e5237dd46"
   },
   "complexity.json": {
-    "bytes": 2601,
-    "sha256": "432863ccd5ab2854"
+    "bytes": 2603,
+    "sha256": "ebf7154b8783d230"
   },
   "complexity_climate.json": {
     "bytes": 2607,
@@ -47,6 +51,10 @@
     "bytes": 2604,
     "sha256": "24b8432686c4bfdf"
   },
+  "complexity_stress.json": {
+    "bytes": 2607,
+    "sha256": "672ea43fc59cc7ed"
+  },
   "confound.json": {
     "bytes": 6765,
     "sha256": "c58362bb0799e85d"
@@ -56,8 +64,8 @@
     "sha256": "43ad73689248f9c8"
   },
   "federation_history.json": {
-    "bytes": 138028,
-    "sha256": "dc1bc7d37f260367"
+    "bytes": 157364,
+    "sha256": "5f788e4c900e2a80"
   },
   "federation_history_climate.json": {
     "bytes": 181152,
@@ -71,36 +79,40 @@
     "bytes": 105348,
     "sha256": "6f0c37300989a8da"
   },
+  "federation_history_stress.json": {
+    "bytes": 298171,
+    "sha256": "f5b2a99c5bc0d9e9"
+  },
   "fidelity.json": {
     "bytes": 4623,
-    "sha256": "bfad6e78b8313f9b"
+    "sha256": "05336c9a963faab4"
   },
   "heterogeneity.json": {
-    "bytes": 17131,
-    "sha256": "18b7f8e2ba9c1959"
+    "bytes": 17140,
+    "sha256": "1d377ef9f282b9b4"
   },
   "meta.json": {
-    "bytes": 6446,
-    "sha256": "1758d3d97b4f2a12"
+    "bytes": 11485,
+    "sha256": "4c75287643fdafeb"
   },
   "mu_sweep.json": {
     "bytes": 1133,
-    "sha256": "2d3abfee6ae009a7"
+    "sha256": "7f26cbe42b67c4bf"
   },
   "ood.json": {
-    "bytes": 265971,
-    "sha256": "5377946cad78d1e7"
+    "bytes": 265951,
+    "sha256": "15ed1651756bb2fe"
   },
   "predictions.json": {
-    "bytes": 624286,
-    "sha256": "3f6ed05afe6d0676"
+    "bytes": 624215,
+    "sha256": "ecf68ece89b9682a"
   },
   "scenarios.json": {
-    "bytes": 287474,
-    "sha256": "eb49f3aae7fe86ac"
+    "bytes": 287378,
+    "sha256": "b7f595bd1f2a4da0"
   },
   "significance.json": {
-    "bytes": 6718,
-    "sha256": "bc4cf0aeea62b49a"
+    "bytes": 6715,
+    "sha256": "d9f32d1afc4ec55e"
   }
 }
