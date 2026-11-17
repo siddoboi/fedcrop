@@ -6,7 +6,7 @@
       "kendall_tau_sd": 0.035847,
       "kendall_tau_lo": 0.703836,
       "kendall_tau_hi": 0.745953,
-      "top5_jaccard": 0.67619,
+      "top10_jaccard": 0.573393,
       "spearman_rho": 0.892773,
       "n_pairs": 10
     },
@@ -16,7 +16,7 @@
       "kendall_tau_sd": 0.036984,
       "kendall_tau_lo": 0.368116,
       "kendall_tau_hi": 0.431202,
-      "top5_jaccard": 0.619048,
+      "top10_jaccard": 0.509424,
       "spearman_rho": 0.553621,
       "n_pairs": 5
     },
@@ -26,7 +26,7 @@
       "kendall_tau_sd": 0.035486,
       "kendall_tau_lo": 0.371356,
       "kendall_tau_hi": 0.432737,
-      "top5_jaccard": 0.488095,
+      "top10_jaccard": 0.509424,
       "spearman_rho": 0.559277,
       "n_pairs": 5
     },
@@ -36,22 +36,27 @@
       "kendall_tau_sd": 0.023809,
       "kendall_tau_lo": 0.525149,
       "kendall_tau_hi": 0.56607,
-      "top5_jaccard": 0.590476,
+      "top10_jaccard": 0.52381,
       "spearman_rho": 0.732086,
       "n_pairs": 5
     }
   ],
   "agronomic_check": {
-    "verdict": "INCONCLUSIVE",
-    "reason": "no climate months in the top 5; the ranking is driven by annual covariates, so the agronomic test does not apply",
+    "verdict": "PASS",
+    "reason": "4 of the top 10 features are monsoon months",
     "top_features": [
       "irrigation_ratio",
       "nitrogen_consumption",
       "gross_cropped_area",
       "phosphate_consumption",
-      "gross_irrigated_area"
+      "gross_irrigated_area",
+      "potash_consumption",
+      "jun_max_temp",
+      "jul_precipitation",
+      "sep_precipitation",
+      "jun_windspeed"
     ],
-    "n_monsoon_in_top": 0,
+    "n_monsoon_in_top": 4,
     "n_post_monsoon_in_top": 0,
     "share_monsoon": 0.2584242522716522,
     "share_post_monsoon": 0.15597577393054962,

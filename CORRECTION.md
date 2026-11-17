@@ -51,11 +51,12 @@ Row counts are unchanged: 10,223 rows, split 7,579 / 878 / 1,766.
 | FedPer R² | 0.364 | 0.357 |
 | FedAvg R² | 0.295 | 0.295 |
 | FedProx R² | 0.292 | 0.294 |
-| FedPer vs centralised, Wilcoxon p | 0.18 | 0.29 |
-| Local-only vs centralised, Wilcoxon p | 0.0005 | 0.62 |
+| FedPer vs centralised, Wilcoxon p | 0.44 | 0.29 |
+| Local-only vs centralised, Wilcoxon p | 0.89 | 0.62 |
 | Explanation agreement τ, seed control | 0.719 | 0.725 |
 | τ centralised vs FedPer / FedAvg | 0.508 / 0.387 | 0.546 / 0.399 |
-| Agronomic plausibility check | PASS | INCONCLUSIVE |
+| Top-10 Jaccard retained, FedPer / FedAvg | 87% / 73% | 91% / 89% |
+| Agronomic plausibility check (top 10) | PASS | PASS |
 | Fidelity (all arms) | PASS | PASS |
 | Drought R² drop, FedPer | −0.20 | −0.154 |
 | +2 °C, −20% rain: Jharkhand / Punjab | −33.3% / +8.5% | −36.4% / +9.4% |
@@ -73,25 +74,22 @@ Row counts are unchanged: 10,223 rows, split 7,579 / 878 / 1,766.
 
 **Hold**
 - FedPer is statistically on par with centralised per state (p = 0.29).
-- FedPer's explanations agree most closely with centralised, and the gap to the
+- FedPer's explanations agree most closely with centralised (τ), and the gap to the
   seed control is still attributable to federation.
+- The agronomic plausibility check still passes: 4 of the centralised model's top 10
+  features are monsoon months, none post-monsoon.
 - FedPer is the most robust arm on each state's driest monsoons.
 - Plain federation (FedAvg, FedProx) falls below the trend baseline.
 - For the centralised model, neither feature group alone beats the trend; only
-  both together do.
+  both together do. For FedPer, climate adds nothing (as in `main`).
 
 **Weaken**
-- Centralised's lead is smaller (skill +0.099 instead of +0.136), and it is no
-  longer significantly better than local-only (p = 0.62).
-- The −1 values were partly acting as a state marker. Part of the v5 accuracy
-  came from that, not from agronomy.
-
-**Flip**
-- The agronomic check moves from PASS to INCONCLUSIVE: no climate month
-  reaches the top 5 attributions. Irrigation and fertiliser dominate.
-- For FedPer, climate adds nothing: covariates alone (+0.015) score slightly
-  better than all features (−0.006). Climate is predictive only for the
-  pooled centralised model.
+- Centralised accuracy is lower (R² 0.424 instead of 0.448; skill +0.099 instead
+  of +0.136). Part of the earlier accuracy came from the −1 values acting as a
+  state marker.
+- The FedProx sweep no longer falls at every step of μ: no μ helps, and strong μ hurts.
+- On top-10 overlap alone, FedPer's lead over FedAvg and FedProx is now small
+  (91% against 89% of the seed control).
 
 ## Remaining limitation
 
@@ -114,7 +112,7 @@ python scripts/03_train_all.py --mu-sweep
 python scripts/03_train_all.py --protocol climate_stress
 python scripts/03_train_all.py --features climate     # and covariates, none
 python scripts/03_train_all.py                        # restores the full-feature checkpoints and scalers
-python scripts/04_explain.py
+python scripts/04_explain.py --topk 10
 python scripts/05_evaluate.py
 python scripts/10_make_demo_data.py
 ```
