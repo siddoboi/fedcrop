@@ -81,8 +81,8 @@
   ],
   "inference": {
     "batch_size": 200,
-    "batch_seconds": 0.0033,
-    "ms_per_sample": 0.0163
+    "batch_seconds": 0.005,
+    "ms_per_sample": 0.0251
   },
   "asymptotics": {
     "training_per_round": "O(K * E * N_k * T * H^2)",
@@ -97,8 +97,8 @@
       "bytes_per_round_all_clients": 1218508,
       "kb_per_round": 1189.9,
       "total_mb": 45.32,
-      "wall_clock_s": 70.1,
-      "s_per_round": 1.8
+      "wall_clock_s": 74.1,
+      "s_per_round": 1.9
     },
     {
       "algorithm": "fedprox",
@@ -106,17 +106,17 @@
       "bytes_per_round_all_clients": 1218508,
       "kb_per_round": 1189.9,
       "total_mb": 45.32,
-      "wall_clock_s": 76.8,
-      "s_per_round": 1.97
+      "wall_clock_s": 82.9,
+      "s_per_round": 2.13
     },
     {
       "algorithm": "fedper",
-      "rounds_run": 120,
+      "rounds_run": 101,
       "bytes_per_round_all_clients": 1036032,
       "kb_per_round": 1011.8,
-      "total_mb": 118.56,
-      "wall_clock_s": 215.6,
-      "s_per_round": 1.8
+      "total_mb": 99.79,
+      "wall_clock_s": 191.7,
+      "s_per_round": 1.9
     }
   ]
 }

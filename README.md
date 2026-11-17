@@ -296,18 +296,21 @@ Test years 2012 to 2015, 5 seeds (mean ± sd). Skill is the R² gain over the di
 | Arm | R² | Skill vs trend |
 |---|---|---|
 | District trend (baseline) | 0.348 | 0 |
-| Centralised | 0.448 ± 0.018 | +0.136 ± 0.029 |
-| Local-only | 0.391 ± 0.020 | +0.047 ± 0.031 |
-| **FedPer** | 0.364 ± 0.016 | +0.005 ± 0.024 |
-| FedAvg | 0.295 ± 0.010 | −0.103 ± 0.015 |
-| FedProx | 0.292 ± 0.009 | −0.108 ± 0.015 |
+| Centralised | 0.424 ± 0.021 | +0.099 ± 0.033 |
+| Local-only | 0.392 ± 0.021 | +0.049 ± 0.033 |
+| **FedPer** | 0.357 ± 0.017 | −0.006 ± 0.027 |
+| FedAvg | 0.295 ± 0.010 | −0.102 ± 0.016 |
+| FedProx | 0.294 ± 0.012 | −0.104 ± 0.018 |
 
 Key findings:
 
-- Under strong differences between states, plain federation (FedAvg, FedProx) falls below the trend baseline. Personalisation (FedPer) makes federation viable: per-state accuracy is not significantly different from centralised (Wilcoxon p = 0.18).
-- FedPer's explanations agree most closely with the centralised model's (Kendall's tau 0.508, against a seed-to-seed control of 0.719).
+- Under strong differences between states, plain federation (FedAvg, FedProx) falls below the trend baseline. Personalisation (FedPer) makes federation viable: per-state accuracy is not significantly different from centralised (Wilcoxon p = 0.29).
+- FedPer's explanations agree most closely with the centralised model's (Kendall's tau 0.546, against a seed-to-seed control of 0.725).
 - FedPer is the most robust arm when each state's driest monsoons are held out.
-- Under +2 °C and −20% rainfall, predicted yield falls sharply in rain-fed states (Jharkhand) and changes little in heavily irrigated ones (Punjab).
+- Farm inputs (irrigation, fertiliser) dominate the explanations. Climate improves the pooled centralised model, but adds nothing for FedPer.
+- Under +2 °C and −20% rainfall, predicted yield falls sharply in rain-fed states (Jharkhand −36%) and rises slightly in heavily irrigated ones (Punjab +9%).
+
+These results use the corrected cleaning of the source's −1 missing-value code. See `CORRECTION.md` for what changed and the results before the correction.
 
 The project report has full tables, confidence intervals and the complexity analysis.
 
@@ -328,7 +331,8 @@ The project report has full tables, confidence intervals and the complexity anal
 ## 11. Limitations
 
 - One crop (rice) and one data source, ending in 2015.
-- The source uses −1 as a missing-value code for gross irrigated area (about 10% of rows, mostly Assam and West Bengal) and in a few N/P/K values. The current cleaning treats it as a number. This should be re-cleaned in future work.
+- The source uses −1 as a missing-value code in irrigated area and N/P/K. It is recoded as missing and imputed with each state's training-year median (`missing_code_strategy` in `config/base.yaml`). Assam and West Bengal have very few real irrigation values (45 and 12 training rows), so their state-level results are unreliable.
+- Rows with an imputed farm figure are left out of the demo files, so Maharashtra and West Bengal have no demo rows.
 - Privacy comes from data locality only. There is no secure aggregation or differential privacy.
 - The climate scenario is a sensitivity analysis, not an emission-scenario projection.
 

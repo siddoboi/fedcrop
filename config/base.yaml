@@ -20,6 +20,12 @@ cleaning:
   drop_zero_yield: true
   drop_missing_climate: true
   outlier_z: 3.0            # computed on training years only
+  # The source writes -1 for "not recorded" in these farm columns
+  # (cleaning.MISSING_CODE_COLUMNS). impute: treat as missing, fill with the
+  # state's training median. drop: remove those rows. keep: use -1 as a number,
+  # which reproduces the results submitted with report v5.
+  missing_codes: [-1]
+  missing_code_strategy: impute   # impute | drop | keep
 
 split:
   train_years: [1990, 2009]

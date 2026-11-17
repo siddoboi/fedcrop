@@ -63,6 +63,7 @@ MAX_BYTES = 2 * 1024 * 1024
 MIN_RICE_AREA = 2.0            # thousand ha, config cleaning.min_rice_area
 Z_WARN = 4.0                   # standard deviations from the state's training mean
 TRAIN_YEARS = (1990, 2009)
+MISSING_CODES = (-1.0,)        # config cleaning.missing_codes: the source's "not recorded"
 SHAP_SAMPLES = 50
 
 MONTHS = C.MONTHS_FULL
@@ -295,7 +296,10 @@ def validate(df: pd.DataFrame) -> tuple[pd.DataFrame, list[dict], dict[int, list
                            "trained on; smaller districts were removed as too noisy.")
         for c in RAW_COV_NAMES:
             v = num[c].iat[i]
-            if not pd.isna(v) and v < 0:
+            if not pd.isna(v) and v in MISSING_CODES:
+                reasons.append(f"{c} is {v:g}, the source's missing-value code. Uploads cannot be "
+                               "filled in, because the training medians are not stored.")
+            elif not pd.isna(v) and v < 0:
                 reasons.append(f"{c} cannot be negative.")
         if has_actual:
             raw = df.at[i, "actual_yield"]
